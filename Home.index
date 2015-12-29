@@ -1,0 +1,85 @@
+<HTML>
+
+<head>
+<title>My Protfolio</title>
+<H1 align="center"><b>Welcome</b></H1>
+</head>
+<H1>Test</H1>
+<H2>Test</H2>
+<H3>Test</H3>
+<H4>Test</H4>
+<H5>Test</H5>
+<H6>Test</H6>
+
+<body>
+
+
+<p align="center">I'm making a protfolio for applying to jobs and to progress my career
+
+
+My name is Kris Kelley I want to be a programmer
+here is the list of languages I'm going to learn:
+</p>
+<p align="center">
+<h1><b>The table below will hold the classes I've taken with links to certificates to show proof</b></h1>
+<TABLE BORDER="1">
+<TR><TD>First</TD><TD>Second</TD><TD>Third</Td></TR>
+<TR><TD>First</TD><TD>Second</TD><TD>Third</Td></TR>
+<TR><TD>First</TD><TD>Second</TD><TD>Third</Td></TR>
+<TR><TD>First</TD><TD>Second</TD><TD>Third</Td></TR>\
+</table>
+</p>
+
+<p align="center">
+<OL>
+
+	<li>
+	Java
+	</li>
+
+	<li>
+	C
+	</li>
+
+	<li>
+	Python
+	</li>
+
+	<li>
+	Html/css
+	</li>
+
+	<li>
+	Java script
+	</li>
+
+	<li>
+	PHP
+	</li>
+
+	<li>
+	Ruby
+	</li>
+</OL>
+</p>
+<h1 align="center"> contact me </h1>
+<p align="center">You can reach me at kelleyblackmore@gmail.com or 408-649-9905</P>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+
+</HTML>
