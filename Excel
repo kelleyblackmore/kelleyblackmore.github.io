@@ -1,21 +1,21 @@
 <HTML>
 <body>
-Press the button to start Excel and display quarterly data.
-<Script language="VBScript">
-Function CreateNamesArray()
-  ' Create an array to set multiple values at once.
-    Dim saNames(5, 2)
-    saNames(0, 0) = "John"
-    saNames(1, 0) = "Tom"
-    saNames(1, 1) = "Brown"
-    saNames(2, 0) = "Sue"
-    saNames(2, 1) = "Thomas"
-    saNames(3, 0) = "Jane"
-    saNames(3, 1) = "Jones"
-    saNames(4, 0) = "Adam"
-    saNames(4, 1) = "Johnson"
-    CreateNamesArray = saNames
-End Function
-</SCRIPT>
-
+Hello world
+</body>
   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</html>
