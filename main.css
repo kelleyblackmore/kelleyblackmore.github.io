@@ -1,6 +1,8 @@
-body { 
-    background: blue no-repeat fixed center; 
-}
-H1 { 
-  font: green ;
-}
+ body {
+ border: 1px solid red;
+    background-color: yellow;
+    padding-top: 100px;
+    padding-right: 100px;
+    padding-bottom: 100px;
+    padding-left: 100px;
+ }
