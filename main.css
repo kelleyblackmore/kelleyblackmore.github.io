@@ -1,11 +1,9 @@
-p {
-    padding: 50px 30px 50px 80px;
-}
+
 ul.nav  {
 margin-left: 0px;
 padding-left: 0px;
 list-style: none;
-border-bottom: 1px groove #000;
+border-bottom: 10px groove #000;
 overflow: hidden;
 zoom: 1;
 }
@@ -24,13 +22,33 @@ text-decoration:none;
 color: #333;
 text-align: center;
 }
-todolist {
-margin: center;
-
+div.jumbotron h1{
+color: green;
+padding: 50px;
+font-size: 50px;
+text-align: center;
+border: dotted;
+	
+}
+div.Website_info p{
+    text-align: center;
+    padding-right: 100px;
+    padding-left: 100px;
+    padding-bottom: 50px;
+}
+div.Website_info h1{
+    text-align: center;
+    padding-bottom: 100px;
+}
+div.Website_info h2{text-align: center;
+    padding-bottom: 50px
 }
 
 
 
 
 
-</html>
+div.return_to_top {
+    text-align: center;
+    padding-bottom: 0px;
+}
