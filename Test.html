@@ -19,24 +19,22 @@
  <p>hello my name is kris and i am testing page layout</p>
  
 	
+<h1>JavaScript Can Change Images</h1>
 
-  <br /><br />
-  
-  <h2> THis is the Homepage</h2>
-  
-<hr />
-<h2>Things I need to get done</h2>
-<il>
-  <ul><strike>Intergrate Tennis game into site</strike></ul>
-  <ul><strike>Add Who am I section</strike></ul>
-  <ul> add contact info</ul>
-  <ul>Add another page</ul>
-  <ul>Layout the pages</ul>
-  <ul>add pictures</ul>
-  <ul>add color</ul>
-  
+<img id="myImage" onclick="changeImage()" src="pic_bulboff.gif" width="100" height="180">
 
-  
+<p>Click the light bulb to turn on/off the light.</p>
+
+<script>
+function changeImage() {
+    var image = document.getElementById('myImage');
+    if (image.src.match("bulbon")) {
+        image.src = "pic_bulboff.gif";
+    } else {
+        image.src = "pic_bulbon.gif";
+    }
+}
+</script>
   
 </il>
 </body>
