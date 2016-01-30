@@ -11,7 +11,7 @@ ul.nav li {
 float: left;
 }
 ul.nav a {
-width: 12 em;
+font-size: 30;
 display: block;
 border: 1px groove #000;
 border-bottom: none;
