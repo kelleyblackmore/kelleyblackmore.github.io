@@ -1,11 +1,12 @@
 
 ul.nav  {
 margin-left: 0px;
-padding-left: 0px;
+padding-left: 1px;
+padding-right:  1px;
 list-style: none;
-border-bottom: 10px groove #000;
+border-bottom: 5px groove #000;
 overflow: hidden;
-zoom: 1;
+zoom: auto;
 }
 ul.nav li {
 float: left;
@@ -13,23 +14,30 @@ float: left;
 ul.nav a {
 font-size: 30;
 display: block;
-border: 1px groove #000;
+border: 5px groove #000;
 border-bottom: none;
-padding: 5px;
-margin-right: 5px;
+padding: 10px;
+margin-right: 0px;
 background-color: #EAEAEA;
 text-decoration:none;
 color: #333;
 text-align: center;
+font-size: 20px;
+background-color: whitesmoke;
+font-family: sans-serif;
 }
 div.jumbotron h1{
-color: blue;
-padding: 50px;
-font-size: 75px;
+color: gray;
+padding:10px;
+font-size: 100px;
 text-align: center;
-border: dotted;
+border: solid;
 background: black;
-	
+margin: auto;
+box-sizing: border-box;
+visibility: visible;
+font-size-adjust: auto;
+border-radius: 10px;
 }
 div.Website_info p{
     text-align: center;
@@ -54,7 +62,7 @@ div.return_to_top {
     padding-bottom: 0px;
 }
 body {
-	background:#00ace6;
+	background:#352;
 }
 footer { text-align: center;
 
