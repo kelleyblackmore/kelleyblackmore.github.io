@@ -6,6 +6,9 @@
 	
 }
 ul.nav  {
+
+        
+    
 margin-left: 0px;
 padding-left: 0px;
 padding-right:  1px;
@@ -17,12 +20,14 @@ overflow: hidden;
 ul.nav li {
 float: left;
 border: solid;
+    border-radius: 5%;
+    padding: .1em;
 }
 ul.nav a {
 font-size: 30;
 display:block;
 border: 5px groove #000;
-
+border-radius: 5%;
 padding: 10px;
 margin-right: 0px;
 color: #333;
@@ -58,7 +63,11 @@ div.Website_info h2{text-align: center;
     padding-bottom: 50px
 }
 
-
+#ltc {
+    float:left;
+    position: inherit;
+    
+}
 
 
 
@@ -67,8 +76,9 @@ div.return_to_top {
     padding-bottom: 0px;
 }
 body {
-	background-color:#333;
-    color: grey;
+	background-color:lightblue;
+    color: black;
+    float:left;
 }
 footer { text-align: center;
 
