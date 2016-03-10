@@ -1,5 +1,5 @@
 * {
-    margin: 5px;
+    margin: 0px;
     padding: 1px
     
     
@@ -111,6 +111,7 @@ footer { text-align: center;
 }
 body{
     margin-left:400px;
+    margin-right: 400px;
     
     
 }
