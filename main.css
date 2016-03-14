@@ -11,15 +11,18 @@
 	max-height: 100px;
 	
 }
+.main {
+    border: solid;
+    float: left;
+    margin: 100px;
+    
+}
+    
+}
 ul.nav  {
 
-margin-left: 0px;
-padding-left: 0px;
-padding-right:  0px;
 list-style: none;
-    float: left;
 
-overflow: hidden;
 }
 ul.nav li {
 float: left;
@@ -29,19 +32,16 @@ float: left;
 ul.nav a {
 display:block;
 border: 5px groove #000;
-border-radius: 100%;
+border-width: 5px;
 padding: 10px;
 color: #333;
 text-align: center;
 font-size: 20px;
 background-color: whitesmoke;
 font-family: sans-serif;
+margin: 50px;
+}
 
-}
-a:link {
-    text-decoration: none;
-    
-}
 div.jumbotron h1{
 color: gray;
 padding:10px;
@@ -92,21 +92,27 @@ div.return_to_top {
 }
 body {
 	background-color:lightblue;
-    color: black;
-    float:left;
-}
-footer { text-align: center;
+    
 
 }
+footer { 
+    float: left;
+    text-align: center;
+
+}
+#foot01{
+    float:left;
+    
+}
 #mepic{
-    float: right 
+    float: right ;
     
         
     
 }
 #goals{
-    
-    float: left;
+    position: relative;
+    float: left
 }
 #res{
     float: left;
