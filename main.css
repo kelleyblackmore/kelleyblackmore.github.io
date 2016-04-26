@@ -1,17 +1,31 @@
 *{
-    
+    background-image
     
 }
 h1 {
     border-style: solid;
-    margin-left:100;
-margin-right: 100;
+
 }
 nav{
     
     
 }
-.links{
+#links{
     
+    list-style-type: none;
+    
+}
+li{
+    padding: 10px;
+    float: right;
+    list-style: none;
+    margin: 10px;
+    
+    
+}
+body{
+    background-color: #faf2e4;
+    margin: 0 15%;
+    font-family: sans-serif;
     
 }
