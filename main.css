@@ -8,7 +8,10 @@ h1 {
 }
 nav{
     
-    
+   #certs{
+       float:right;
+       
+   } 
 }
 #links{
     
