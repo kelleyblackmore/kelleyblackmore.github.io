@@ -1,34 +1,4 @@
 *{
-    background-image
-    
-}
-h1 {
+    padding:.5em;
     border-style: solid;
-
-}
-nav{
-    
-   #cert{
-       float:right;
-       
-   } 
-}
-#links{
-    
-    list-style-type: none;
-    
-}
-li{
-    padding: 10px;
-    float: right;
-    list-style: none;
-    margin: 10px;
-    
-    
-}
-body{
-    background-color: #faf2e4;
-    margin: 0 15%;
-    font-family: sans-serif;
-    
 }
