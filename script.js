@@ -6,12 +6,13 @@ function warnonAlert(){
     
     
 }
-function addNavbar(){
-    
-    
-    document.getElementById('navbar').innerHTML = 
-/**Navbar */
-'<div class="w3-top">'+
+function init(){
+    addNavbar();
+    addFooter();
+}
+function addNavbar() {
+document.getElementById('navbar').innerHTML =
+   '<div class="w3-top">'+
  ' <ul class="w3-navbar w3-blue w3-card-2 w3-left-align w3-large">'+
    ' <li class="w3-hide-medium w3-hide-large w3-opennav w3-right">'+
     '</li>'+
@@ -21,5 +22,17 @@ function addNavbar(){
     '<li class="w3-hide-small"><a href="learntocode.html" class="w3-padding-large w3-hover-white">Learn to code</a></li>'+
     '<li class="w3-hide-small"><a href="contactme.html" class="w3-padding-large w3-hover-white">Contact me</a></li>'+
   '</ul>';
-  
-  }
+}
+
+function addFooter(){
+document.getElementById('footer').innerHTML=
+    '<footer class="w3-container w3-padding-64 w3-center w3-opacity">'+
+  '<div>'+
+   '<a href="https://twitter.com/kelleydevmore" class="w3-hover-text-light-blue"><i class="fa fa-twitter"></i></a>'+
+   '<a href="https://github.com/kelleyblackmore" class="w3-hover-text-grey"><i class="fa fa-github"></i></a>'+
+   '<a href="https://www.linkedin.com/in/kris-kelley-974629ab" class="w3-hover-text-indigo"><i class="fa fa-linkedin"></i></a>'+
+ '</div>'+
+'</footer>';
+    
+    
+}
