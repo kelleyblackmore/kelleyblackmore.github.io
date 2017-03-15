@@ -4,49 +4,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="main.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">
-<link src="script.js">
+
+<script type="text/javascript" src="script.js"></script>
 <style>
 body,h1,h2,h3,h4,h5,h6 {font-family: "Lato", sans-serif}
 .w3-navbar,button {font-family: "Montserrat", sans-serif}
 .fa-anchor,.fa-coffee {font-size:200px}
 </style>
-<body onload="myFunction()">
-  <div id="narbar"  ></div>
-  <script>
-function myFunction() {
-document.getElementById('navbar').innerHTML =
-   '<div class="w3-top">'+
- ' <ul class="w3-navbar w3-blue w3-card-2 w3-left-align w3-large">'+
-   ' <li class="w3-hide-medium w3-hide-large w3-opennav w3-right">'+
-    '</li>'+
-    '<li><a href="index.html" class="w3-padding-large w3-white">Home</a></li>'+
-    '<li class="w3-hide-small"><a href="projects.html" class="w3-padding-large w3-hover-white">Projects</a></li>'+
-   '<li class="w3-hide-small"><a href="blog.html" class="w3-padding-large w3-hover-white">Blog</a></li>'+
-    '<li class="w3-hide-small"><a href="learntocode.html" class="w3-padding-large w3-hover-white">Learn to code</a></li>'+
-    '<li class="w3-hide-small"><a href="contactme.html" class="w3-padding-large w3-hover-white">Contact me</a></li>'+
-  '</ul>';
-}
-</script>
-  
+<body onload="init()" src="script.js">
+  <!-- header -->
+<div id="navbar"></div>
 
+<!--Content-->  
 
- 
-  
-  
-  
 
 
 
 <!-- Footer -->
-<footer class="w3-container w3-padding-64 w3-center w3-opacity">
- 
-  <div>
-   <a href="https://twitter.com/kelleydevmore" class="w3-hover-text-light-blue"><i class="fa fa-twitter"></i></a>
-   <a href="https://github.com/kelleyblackmore" class="w3-hover-text-grey"><i class="fa fa-github"></i></a>
-   <a href="https://www.linkedin.com/in/kris-kelley-974629ab" class="w3-hover-text-indigo"><i class="fa fa-linkedin"></i></a>
- </div>
- 
-</footer>
+<div id="footer"></div>
+
 
 </body>
 </html>
