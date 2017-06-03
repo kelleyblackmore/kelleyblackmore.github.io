@@ -8,5 +8,5 @@ Note:
 <li> better layout </li>
 
 </ul>
-![Marshtomp](http://randompokemon.com/sprites/animated/350.gif)
+
 
