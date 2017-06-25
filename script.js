@@ -10,8 +10,10 @@ function init(){
     
     addNavbar();
     addFooter();
+    getFiles();
 }
 function addNavbar() {
+    
 document.getElementById('navbar').innerHTML =
    '<div>'+
  ' <ul >'+
@@ -38,6 +40,15 @@ document.getElementById('footer').innerHTML=
 '</footer>';
     
     
+}
+
+function getFiles(){
+    var inp = document.getElementById("get-files");
+// Access and handle the files 
+
+for (i = 0; i < inp.files.length; i++) {
+    let file = inp.files[i];
+   console.log(file);
 }
 function blogs(){
     
