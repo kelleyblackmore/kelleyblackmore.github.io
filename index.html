@@ -1,23 +1,33 @@
 <!DOCTYPE html>
-<html>
-<title>Kris Kelley</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="main.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">
-
-<script type="text/javascript" src="script.js"></script>
-
-<body onload="init()" src="script.js">
-  <!-- header -->
-<div id="navbar"></div>
-
-<!--Content-->  
-
-<div><p>Hello</p></div>
-
-
-<!-- Footer -->
-<div id="footer"></div>
+<html lang ="en">
+    <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name ="viewport" content="width=device-width, initial-scale = 1">
+    <title>Basic Grid System</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+        <style>
+            .show-grid [class^=col-]{
+                padding-top: 10px;
+                padding-bottom: 10px;
+                background-color: #eee;
+                background-color: rgba(86,61,124,.15);
+                border: 1px solid #ddd;
+                border: 1px solid rgba(86,61,124,.2);
+            }
+        
+        </style>
+    
+    
+    </head>
+<body>
+    <div class="container">
+    <h1>Basic Grid System</h1>
+        <div class="row show-grid">
+            <div class = "col-md-1">.col-md-1</div>
+        
+        </div>
+    </div>
 
 
 </body>

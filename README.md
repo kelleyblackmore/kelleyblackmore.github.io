@@ -6,6 +6,8 @@ Note:
 <li></li>
 
 <li> better layout </li>
+<li>Set up bootStrap</li>
+<li>Set up Jquery</li>
 
 </ul>
 
