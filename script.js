@@ -19,7 +19,7 @@ document.getElementById('nav').innerHTML =
         '<span class="icon-bar"></span>' +
          '<span class="icon-bar"></span>' +   
         '</button>' +
-        '<a href="#" class="navbar-brand"><img src="photos/favicon.ico" style="height:100%; width: auto;" alt="Kelleyblackmore.github.io"/></a>' +
+        '<a href="index.html" class="navbar-brand"><img src="photos/favicon.ico" style="height:100%; width: auto;" alt="Kelleyblackmore.github.io"/></a>' +
         '<p class="navbar-text"><strong>Kris=Dev</strong></p>' +
         '</div>' +
         '<div class="collapse navbar-collapse" id="collapseNav">' +
