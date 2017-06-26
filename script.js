@@ -24,7 +24,7 @@ document.getElementById('nav').innerHTML =
         '</div>' +
         '<div class="collapse navbar-collapse" id="collapseNav">' +
             '<ul class="nav navbar-nav">' +
-            '<li class="active"><a href="#">Home</a></li>' +
+            '<li class="active"><a href="index.html">Home</a></li>' +
             '<li><a href="aboutme.html">About Me</a></li>' +
             '<li><a  href="blog.html">Blog</a></li>' +
             '<li><a  href="projects.html">Projects</a></li>' +
