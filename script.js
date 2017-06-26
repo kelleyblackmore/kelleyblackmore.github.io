@@ -37,7 +37,7 @@ document.getElementById('nav').innerHTML =
             '</div>' +
             '</form>' +
             '<ul class="nav navbar-nav navbar-right">' +
-            '<li><a href="">Contact me</a></li>' +
+            '<li><a href="contactme.html">Contact me</a></li>' +
             '</ul>' +
         '</div>' +
     '</div>' +
