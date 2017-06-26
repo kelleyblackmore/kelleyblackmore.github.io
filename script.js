@@ -1,51 +1,46 @@
 
 
-function warnonAlert(){
-    alert("This isn't working yet");
+function warnonAlert() {
+    //alert("This isn't working yet");
     console.log("this isn't working right");
     
     
 }
-function init(){
-    
-    addNavbar();
-   // addFooter();
-  //  getFiles();
-}
+
 function addNavbar() {
     
-document.getElementById('navbar').innerHTML =
-'<nav class="navbar navbar-default" >'+
-    '<div class="container-fluid">'+
-        '<div class="navbar-header">'+
-        '<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#collapsedNav">'+
-        '<span class="sr-only">Toggle navigation</span>'+    
-        '<span class="icon-bar"></span>'+
-        '<span class="icon-bar"></span>'+
-         '<span class="icon-bar"></span>'+   
-        '</button>'+
-        '<a href="#" class="navbar-brand"><img src="photos/favicon.ico" style="height:100%; width: auto;" alt="Kelleyblackmore.github.io"/></a>'+
-        '<p class="navbar-text"><strong>Kris=Dev</strong></p>'+
-        '</div>'+
-        '<div class="collapse navbar-collapse" id="collapseNav">'+
-            '<ul class="nav navbar-nav">'+
-            '<li class="active"><a href="#">Home</a></li>'+
-            '<li><a href="aboutme.html">About Me</a></li>'+
-            '<li><a  href="blog.html">Blog</a></li>'+
-            '<li><a  href="projects.html">Projects</a></li>'+
-            '<li><a  href="learntocode.html">Learn to code</a></li>'+
-            '<li><a  href="projects.html">Projects</a></li>'+
-            '</ul>'+    
-            '<form class="navbar-form navbar-right" role="search">'+
-            '<div class="form-group">'+
-                '<input type="text" class="form-control" placeholder="Search">'+
-            '</div>'+
-            '</form>'+
-            '<ul class="nav navbar-nav navbar-right">'+
-            '<li><a href="">Contact me</a></li>'+
-            '</ul>'+
-        '</div>'+
-    '</div>'+
+document.getElementById('nav').innerHTML =
+'<nav class="navbar navbar-default" >' +
+    '<div class="container-fluid">' +
+        '<div class="navbar-header">' +
+        '<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#collapsedNav">' +
+        '<span class="sr-only">Toggle navigation</span>' +    
+        '<span class="icon-bar"></span>' +
+        '<span class="icon-bar"></span>' +
+         '<span class="icon-bar"></span>' +   
+        '</button>' +
+        '<a href="#" class="navbar-brand"><img src="photos/favicon.ico" style="height:100%; width: auto;" alt="Kelleyblackmore.github.io"/></a>' +
+        '<p class="navbar-text"><strong>Kris=Dev</strong></p>' +
+        '</div>' +
+        '<div class="collapse navbar-collapse" id="collapseNav">' +
+            '<ul class="nav navbar-nav">' +
+            '<li class="active"><a href="#">Home</a></li>' +
+            '<li><a href="aboutme.html">About Me</a></li>' +
+            '<li><a  href="blog.html">Blog</a></li>' +
+            '<li><a  href="projects.html">Projects</a></li>' +
+            '<li><a  href="learntocode.html">Learn to code</a></li>' +
+            '<li><a  href="projects.html">Projects</a></li>' +
+            '</ul>' +    
+            '<form class="navbar-form navbar-right" role="search">' +
+            '<div class="form-group">' +
+                '<input type="text" class="form-control" placeholder="Search">' +
+            '</div>' +
+            '</form>' +
+            '<ul class="nav navbar-nav navbar-right">' +
+            '<li><a href="">Contact me</a></li>' +
+            '</ul>' +
+        '</div>' +
+    '</div>' +
     '</nav>';
 
 
@@ -64,15 +59,11 @@ document.getElementById('footer').innerHTML=
     
 }
 
-function getFiles(){
-    var inp = document.getElementById("get-files");
-// Access and handle the files 
 
-for (i = 0; i < inp.files.length; i++) {
-    let file = inp.files[i];
-   console.log(file);
-}
-function blogs(){
+    function init(){
     
+    addNavbar();
+    addFooter();
+  //  getFiles();
 }
 
