@@ -116,8 +116,8 @@
           return true; // Ball has exited through the hole
         }
 
-        // Handle collision with the circle's boundary
-        if (distFromCenter + this.radius > circleRadius) {
+        // Handle collision with the circle's boundary only if not in the hole's range
+        if (distFromCenter + this.radius > circleRadius && !isInHoleRange) {
           // Calculate normal vector
           const normalX = distX / distFromCenter;
           const normalY = distY / distFromCenter;
@@ -125,9 +125,16 @@
           // Calculate velocity dot normal
           const dotProduct = this.dx * normalX + this.dy * normalY;
 
-          // Reflect the velocity
-          this.dx = this.dx - 2 * dotProduct * normalX;
-          this.dy = this.dy - 2 * dotProduct * normalY;
+          // Reflect the velocity with added randomness
+          const reflectionFactor = 2; // Standard reflection
+          const randomAngle = (Math.random() - 0.5) * (Math.PI / 18); // +/-5 degrees in radians
+
+          // Calculate new direction
+          const newDx = (this.dx - reflectionFactor * dotProduct * normalX) + Math.cos(randomAngle) * 0.1;
+          const newDy = (this.dy - reflectionFactor * dotProduct * normalY) + Math.sin(randomAngle) * 0.1;
+
+          this.dx = newDx;
+          this.dy = newDy;
 
           // Reposition the ball just inside the boundary to prevent sticking
           this.x = centerX + normalX * (circleRadius - this.radius - 1);
@@ -162,13 +169,6 @@
       ctx.strokeStyle = 'white';
       ctx.stroke();
       ctx.restore();
-
-      // Draw the hole for visualization
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, circleRadius, -holeAngle / 2, holeAngle / 2);
-      ctx.lineWidth = 5;
-      ctx.strokeStyle = 'white';
-      ctx.stroke();
     }
 
     function animate() {
