@@ -1,153 +1,230 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Spinning Circle with Bouncing Balls</title>
+  <style>
+    body {
+      background-color: black;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      flex-direction: column;
+    }
 
-    <title>Kelleyblackmore.io</title>
+    #canvas-container {
+      position: relative;
+      text-align: center;
+    }
 
-    <!-- Bootstrap CSS CDN -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
-    <!-- Our Custom CSS -->
-    <link rel="stylesheet" href="style.css">
-    <style>svg{height: 100px; width:100px;}</style>
-    <!-- Font Awesome JS -->
-    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/solid.js" integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ" crossorigin="anonymous"></script>
-    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/fontawesome.js" integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY" crossorigin="anonymous"></script>
+    #gameCanvas {
+      background-color: black;
+      border: 2px solid white;
+      display: block;
+      margin: 0 auto;
+    }
+
+    #controls {
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      background-color: white;
+      color: black;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: gray;
+    }
+  </style>
 </head>
-
 <body>
-    <div class="wrapper">
-        <!-- Sidebar  -->
-        <nav id="sidebar">
-            <div class="sidebar-header">
-                <div class="sidebar-header">
-                    <img src="https://github.com/kelleyblackmore.png" alt="Kelley Blackmore's Profile Picture" style="max-width:100%; height:auto;">
-                </div>
-                
-            <ul class="list-unstyled components">
-                <p>Kelleyblackmore.io</p>
-                <li class="active">
-                    <a href="#homeSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Home</a>
-                    <ul class="collapse list-unstyled" id="homeSubmenu">
-                        <li>
-                            <a href="#">Home 1</a>
-                        </li>
-                        <li>
-                            <a href="#">Home 2</a>
-                        </li>
-                        <li>
-                            <a href="#">Home 3</a>
-                        </li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="#">About me</a>
-                </li>
-                <li>
-                    <a href="#pageSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Articles</a>
-                    <ul class="collapse list-unstyled" id="pageSubmenu">
-                        <li>
-                            <a href="#">Page 1</a>
-                        </li>
-                        <li>
-                            <a href="#">Page 2</a>
-                        </li>
-                        <li>
-                            <a href="#">Page 3</a>
-                        </li>
-                        <li>
-                            <a href="#">Page 4</a>
-                        </li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="#">Portfolio</a>
-                </li>
-                <li>
-                    <a href="#">Contact</a>
-                </li>
-            </ul>
 
-            <ul class="list-unstyled CTAs">
-                <li>
-                    <a href="" class="download">Download source</a>
-                </li>
-                <li>
-                    <a href="" class="article">github</a>
-                </li>
-            </ul>
-        </nav>
-
-        <!-- Page Content  -->
-        <div id="content">
-
-            <nav class="navbar navbar-expand-lg navbar-light bg-light">
-                <div class="container-fluid">
-
-                    <button type="button" id="sidebarCollapse" class="btn btn-info">
-                        <i class="fas fa-align-left"></i>
-                        <span></span>
-                    </button>
-                    <button class="btn btn-dark d-inline-block d-lg-none ml-auto" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                        <i class="fas fa-align-justify"></i>
-                    </button>
-
-                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                        <ul class="nav navbar-nav ml-auto">
-                            <li class="nav-item active">
-                                <a class="nav-link" href="#">Page</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">Page</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">Page</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">Page</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </nav>
-
-            <h2>About me</h2>
-            <p>My name is kris kelley, I'm a software engineer with the passion to make postive change in the world. I would like to always look to better the human race. Even look to the skys into space to see where we can go in this time period. </p>
-
-            <div class="line"></div>
-
-            <h2>Features of the site</h2>
-            <p>The purpose of this site is to have one stop shop for alot of the projects I work on as well as a blog with articles. If you are interesting in learning about Devops from 2017 to 2018 that was my main focus so I have a few articles written on that.</p>
-
-            <div class="line"></div>
-
-            <h2>Goals</h2>
-            <p>Over the years I've always come up with different goals I want to tackle, they always seem to vary from working out ot learning something in the tech world. The one goal I will always keep is the learning something new. </p>
-
-            <div class="line"></div>
-
-            <h3>Contact me</h3>
-            <p>Reach out to me </p>
-        </div>
+  <div id="canvas-container">
+    <canvas id="gameCanvas" width="600" height="600"></canvas>
+    <div id="controls">
+      <button id="startBtn">Start</button>
+      <button id="resetBtn">Reset</button>
     </div>
+  </div>
 
-    <!-- jQuery CDN - Slim version (=without AJAX) -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-    <!-- Popper.JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
-    <!-- Bootstrap JS -->
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const circleRadius = 250;
+    const holeAngle = Math.PI / 6; // 30 degrees
+    let angle = 0;
+    let balls = [];
+    let animationId;
+    let gameStarted = false;
 
-    <script type="text/javascript">
-        $(document).ready(function () {
-            $('#sidebarCollapse').on('click', function () {
-                $('#sidebar').toggleClass('active');
-            });
-        });
-    </script>
+    class Ball {
+      constructor(x, y, radius, dx, dy, color) {
+        this.x = x;
+        this.y = y;
+        this.radius = radius;
+        this.dx = dx;
+        this.dy = dy;
+        this.color = color;
+      }
+
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.closePath();
+      }
+
+      update() {
+        this.x += this.dx;
+        this.y += this.dy;
+
+        // Calculate distance from center
+        const distX = this.x - centerX;
+        const distY = this.y - centerY;
+        const distFromCenter = Math.sqrt(distX * distX + distY * distY);
+
+        // Determine the current angle of the hole
+        const currentHoleAngle = angle % (2 * Math.PI);
+
+        // Calculate the angle of the ball relative to the center
+        const ballAngle = Math.atan2(distY, distX);
+        let relativeAngle = ballAngle - angle;
+        // Normalize the angle between -PI and PI
+        relativeAngle = (relativeAngle + Math.PI) % (2 * Math.PI) - Math.PI;
+
+        // Define the range of angles that represent the hole
+        const halfHole = holeAngle / 2;
+        const isInHoleRange = Math.abs(relativeAngle) < halfHole;
+
+        // Check if the ball is attempting to exit through the hole
+        if (distFromCenter + this.radius > circleRadius && isInHoleRange) {
+          return true; // Ball has exited through the hole
+        }
+
+        // Handle collision with the circle's boundary
+        if (distFromCenter + this.radius > circleRadius) {
+          // Calculate normal vector
+          const normalX = distX / distFromCenter;
+          const normalY = distY / distFromCenter;
+
+          // Calculate velocity dot normal
+          const dotProduct = this.dx * normalX + this.dy * normalY;
+
+          // Reflect the velocity
+          this.dx = this.dx - 2 * dotProduct * normalX;
+          this.dy = this.dy - 2 * dotProduct * normalY;
+
+          // Reposition the ball just inside the boundary to prevent sticking
+          this.x = centerX + normalX * (circleRadius - this.radius - 1);
+          this.y = centerY + normalY * (circleRadius - this.radius - 1);
+        }
+
+        return false; // Ball has not exited
+      }
+    }
+
+    function spawnBall(initial = true) {
+      const colors = ['red', 'green', 'blue', 'yellow', 'purple', 'orange', 'cyan', 'magenta'];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      const speed = initial ? (Math.random() * 2 + 2) : (Math.random() * 3 + 1.5);
+      // Random direction
+      const angle = Math.random() * 2 * Math.PI;
+      const dx = Math.cos(angle) * speed;
+      const dy = Math.sin(angle) * speed;
+      const ball = new Ball(centerX, centerY, 10, dx, dy, color);
+      balls.push(ball);
+    }
+
+    function drawSpinningCircle() {
+      ctx.save();
+      ctx.translate(centerX, centerY);
+      ctx.rotate(angle);
+      ctx.translate(-centerX, -centerY);
+      ctx.beginPath();
+      // Draw the circle with a hole by skipping the hole's arc
+      ctx.arc(centerX, centerY, circleRadius, holeAngle / 2, 2 * Math.PI - holeAngle / 2);
+      ctx.lineWidth = 5;
+      ctx.strokeStyle = 'white';
+      ctx.stroke();
+      ctx.restore();
+
+      // Draw the hole for visualization
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, circleRadius, -holeAngle / 2, holeAngle / 2);
+      ctx.lineWidth = 5;
+      ctx.strokeStyle = 'red';
+      ctx.stroke();
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw spinning circle with hole
+      drawSpinningCircle();
+
+      // Update and draw balls
+      for (let i = balls.length - 1; i >= 0; i--) {
+        const ball = balls[i];
+        ball.draw();
+        if (ball.update()) {
+          // Ball has exited through the hole
+          balls.splice(i, 1); // Remove the exited ball
+          spawnBall(false); // Spawn two new balls
+          spawnBall(false);
+        }
+      }
+
+      // Spin the circle
+      angle += 0.02; // Adjust rotation speed as needed
+      angle %= 2 * Math.PI; // Keep the angle within 0 to 2π
+
+      animationId = requestAnimationFrame(animate);
+    }
+
+    // Start the game
+    document.getElementById('startBtn').addEventListener('click', () => {
+      if (!gameStarted) {
+        gameStarted = true;
+        balls = []; // Clear existing balls
+        spawnBall(); // Spawn the first ball
+        animate();   // Start animation loop
+      }
+    });
+
+    // Reset the game
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      cancelAnimationFrame(animationId); // Stop the animation
+      gameStarted = false;
+      balls = []; // Clear all balls
+      ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+      angle = 0; // Reset rotation angle
+    });
+
+    // Optional: Allow resetting by pressing the 'R' key and starting with 'S'
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 's' || e.key === 'S') {
+        document.getElementById('startBtn').click();
+      }
+      if (e.key === 'r' || e.key === 'R') {
+        document.getElementById('resetBtn').click();
+      }
+    });
+  </script>
+
 </body>
-
 </html>
