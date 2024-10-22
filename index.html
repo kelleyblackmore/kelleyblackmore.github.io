@@ -14,6 +14,7 @@
       height: 100vh;
       margin: 0;
       flex-direction: column;
+      font-family: Arial, sans-serif;
     }
 
     #canvas-container {
@@ -48,25 +49,18 @@
       background-color: gray;
     }
 
-    /* Optional: Styling for the counter if moved outside the canvas */
-    /*
     #counter {
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
+      margin-bottom: 20px;
       font-size: 24px;
-      color: white;
     }
-    */
   </style>
 </head>
 <body>
 
+  <div id="counter">Balls Exited: 0</div>
+
   <div id="canvas-container">
     <canvas id="gameCanvas" width="600" height="600"></canvas>
-    <!-- If you prefer the counter outside the canvas, uncomment below -->
-    <!-- <div id="counter">Balls Exited: 0</div> -->
     <div id="controls">
       <button id="startBtn">Start</button>
       <button id="resetBtn">Reset</button>
@@ -74,20 +68,35 @@
   </div>
 
   <script>
+    // Get DOM elements
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
+    const startBtn = document.getElementById('startBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const counterDisplay = document.getElementById('counter');
+
+    // Canvas center and circle parameters
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
     const circleRadius = 250;
     const holeAngle = Math.PI / 6; // 30 degrees
+
+    // Rotation angle
     let angle = 0;
+
+    // Array to hold balls
     let balls = [];
+
+    // Animation frame ID
     let animationId;
+
+    // Game state
     let gameStarted = false;
 
-    // Ball counter variable
+    // Ball exit counter
     let exitCount = 0;
 
+    // Ball class definition
     class Ball {
       constructor(x, y, radius, dx, dy, color) {
         this.x = x;
@@ -115,9 +124,6 @@
         const distY = this.y - centerY;
         const distFromCenter = Math.sqrt(distX * distX + distY * distY);
 
-        // Determine the current angle of the hole
-        const currentHoleAngle = angle % (2 * Math.PI);
-
         // Calculate the angle of the ball relative to the center
         const ballAngle = Math.atan2(distY, distX);
         let relativeAngle = ballAngle - angle;
@@ -143,12 +149,14 @@
           const dotProduct = this.dx * normalX + this.dy * normalY;
 
           // Reflect the velocity with added randomness
-          const reflectionFactor = 2; // Standard reflection
-          const randomAngle = (Math.random() - 0.5) * (Math.PI / 18); // +/-5 degrees in radians
+          // Standard reflection
+          let newDx = this.dx - 2 * dotProduct * normalX;
+          let newDy = this.dy - 2 * dotProduct * normalY;
 
-          // Calculate new direction
-          const newDx = (this.dx - reflectionFactor * dotProduct * normalX) + Math.cos(randomAngle) * 0.1;
-          const newDy = (this.dy - reflectionFactor * dotProduct * normalY) + Math.sin(randomAngle) * 0.1;
+          // Add slight randomness to the reflection
+          const randomFactor = 0.3; // Adjust for more/less randomness
+          newDx += (Math.random() - 0.5) * randomFactor;
+          newDy += (Math.random() - 0.5) * randomFactor;
 
           this.dx = newDx;
           this.dy = newDy;
@@ -162,6 +170,7 @@
       }
     }
 
+    // Function to spawn a new ball
     function spawnBall(initial = true) {
       const colors = ['red', 'green', 'blue', 'yellow', 'purple', 'orange', 'cyan', 'magenta'];
       const color = colors[Math.floor(Math.random() * colors.length)];
@@ -174,6 +183,7 @@
       balls.push(ball);
     }
 
+    // Function to draw the spinning circle with a hole
     function drawSpinningCircle() {
       ctx.save();
       ctx.translate(centerX, centerY);
@@ -188,14 +198,15 @@
       ctx.restore();
     }
 
+    // Function to draw the counter on the canvas
     function drawCounter() {
-      const counterText = `Balls Exited: ${exitCount}`;
       ctx.font = '24px Arial';
       ctx.fillStyle = 'white';
       ctx.textAlign = 'center';
-      ctx.fillText(counterText, centerX, 40); // Positioned at top center
+      ctx.fillText(`Balls Exited: ${exitCount}`, centerX, 40);
     }
 
+    // Animation loop
     function animate() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -212,8 +223,10 @@
         if (ball.update()) {
           // Ball has exited through the hole
           balls.splice(i, 1); // Remove the exited ball
-          exitCount++; // Increment the exit counter
-          spawnBall(false); // Spawn two new balls
+          exitCount++;
+          updateCounterDisplay();
+          // Spawn two new balls
+          spawnBall(false);
           spawnBall(false);
         }
       }
@@ -225,34 +238,42 @@
       animationId = requestAnimationFrame(animate);
     }
 
+    // Function to update the counter display (if using a separate div)
+    function updateCounterDisplay() {
+      // Uncomment the line below if using the separate counter div
+      // counterDisplay.textContent = `Balls Exited: ${exitCount}`;
+    }
+
     // Start the game
-    document.getElementById('startBtn').addEventListener('click', () => {
+    startBtn.addEventListener('click', () => {
       if (!gameStarted) {
         gameStarted = true;
         balls = []; // Clear existing balls
-        exitCount = 0; // Reset the counter
+        exitCount = 0; // Reset counter
+        updateCounterDisplay();
         spawnBall(); // Spawn the first ball
         animate();   // Start animation loop
       }
     });
 
     // Reset the game
-    document.getElementById('resetBtn').addEventListener('click', () => {
+    resetBtn.addEventListener('click', () => {
       cancelAnimationFrame(animationId); // Stop the animation
       gameStarted = false;
       balls = []; // Clear all balls
+      exitCount = 0; // Reset counter
       ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
       angle = 0; // Reset rotation angle
-      exitCount = 0; // Reset the counter
+      updateCounterDisplay();
     });
 
     // Optional: Allow resetting by pressing the 'R' key and starting with 'S'
     document.addEventListener('keydown', (e) => {
       if (e.key === 's' || e.key === 'S') {
-        document.getElementById('startBtn').click();
+        startBtn.click();
       }
       if (e.key === 'r' || e.key === 'R') {
-        document.getElementById('resetBtn').click();
+        resetBtn.click();
       }
     });
   </script>
