@@ -47,12 +47,26 @@
     button:hover {
       background-color: gray;
     }
+
+    /* Optional: Styling for the counter if moved outside the canvas */
+    /*
+    #counter {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 24px;
+      color: white;
+    }
+    */
   </style>
 </head>
 <body>
 
   <div id="canvas-container">
     <canvas id="gameCanvas" width="600" height="600"></canvas>
+    <!-- If you prefer the counter outside the canvas, uncomment below -->
+    <!-- <div id="counter">Balls Exited: 0</div> -->
     <div id="controls">
       <button id="startBtn">Start</button>
       <button id="resetBtn">Reset</button>
@@ -70,6 +84,9 @@
     let balls = [];
     let animationId;
     let gameStarted = false;
+
+    // Ball counter variable
+    let exitCount = 0;
 
     class Ball {
       constructor(x, y, radius, dx, dy, color) {
@@ -171,11 +188,22 @@
       ctx.restore();
     }
 
+    function drawCounter() {
+      const counterText = `Balls Exited: ${exitCount}`;
+      ctx.font = '24px Arial';
+      ctx.fillStyle = 'white';
+      ctx.textAlign = 'center';
+      ctx.fillText(counterText, centerX, 40); // Positioned at top center
+    }
+
     function animate() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       // Draw spinning circle with hole
       drawSpinningCircle();
+
+      // Draw the counter
+      drawCounter();
 
       // Update and draw balls
       for (let i = balls.length - 1; i >= 0; i--) {
@@ -184,6 +212,7 @@
         if (ball.update()) {
           // Ball has exited through the hole
           balls.splice(i, 1); // Remove the exited ball
+          exitCount++; // Increment the exit counter
           spawnBall(false); // Spawn two new balls
           spawnBall(false);
         }
@@ -201,6 +230,7 @@
       if (!gameStarted) {
         gameStarted = true;
         balls = []; // Clear existing balls
+        exitCount = 0; // Reset the counter
         spawnBall(); // Spawn the first ball
         animate();   // Start animation loop
       }
@@ -213,6 +243,7 @@
       balls = []; // Clear all balls
       ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
       angle = 0; // Reset rotation angle
+      exitCount = 0; // Reset the counter
     });
 
     // Optional: Allow resetting by pressing the 'R' key and starting with 'S'
