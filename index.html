@@ -1,252 +1,163 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Spinning Circle with Bouncing Balls</title>
-  <style>
-    body {
-      background-color: black;
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      flex-direction: column;
-    }
-
-    #canvas-container {
-      position: relative;
-      text-align: center;
-    }
-
-    #gameCanvas {
-      background-color: black;
-      border: 2px solid white;
-      display: block;
-      margin: 0 auto;
-    }
-
-    #controls {
-      margin-top: 20px;
-    }
-
-    button {
-      padding: 10px 20px;
-      margin: 5px;
-      background-color: white;
-      color: black;
-      border: none;
-      cursor: pointer;
-      font-size: 16px;
-      border-radius: 5px;
-      transition: background-color 0.3s;
-    }
-
-    button:hover {
-      background-color: gray;
-    }
-
-    /* Styling for the ball counter */
-    #ballCounter {
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 24px;
-      color: white;
-      pointer-events: none; /* Allows clicks to pass through */
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CA Assessment Tool</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <header>
+        <h1>Civil Affairs Assessment Tool</h1>
+    </header>
+    <nav>
+        <button class="tablink" onclick="openSection(event, 'Geography')">Geography</button>
+        <button class="tablink" onclick="openSection(event, 'PoliticalGeography')">Political Geography</button>
+        <button class="tablink" onclick="openSection(event, 'History')">History</button>
+        <button class="tablink" onclick="openSection(event, 'People')">People</button>
+        <button class="tablink" onclick="openSection(event, 'USInterests')">US Interests</button>
+        <button class="tablink" onclick="openSection(event, 'ForeignSupport')">Foreign Nation Support</button>
+    </nav>
 
-  <div id="canvas-container">
-    <canvas id="gameCanvas" width="600" height="600"></canvas>
-    <div id="ballCounter">Balls Exited: 0</div>
-    <div id="controls">
-      <button id="startBtn">Start</button>
-      <button id="resetBtn">Reset</button>
-    </div>
-  </div>
+    <main>
+        <!-- Geography Section -->
+        <section id="Geography" class="tabcontent">
+            <h2>Geography</h2>
+            <div class="accordion">
+                <div class="accordion-item">
+                    <button class="accordion-button">Location and Size</button>
+                    <div class="accordion-content">
+                        <form id="locationSizeForm">
+                            <label for="location">Location:</label>
+                            <textarea id="location" name="location" placeholder="Describe the location..."></textarea>
 
-  <script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-    const circleRadius = 250;
-    const holeAngle = Math.PI / 6; // 30 degrees
-    let angle = 0;
-    let balls = [];
-    let animationId;
-    let gameStarted = false;
-    let exitCount = 0; // Ball counter
+                            <label for="neighboringCountries">Neighboring Countries:</label>
+                            <textarea id="neighboringCountries" name="neighboringCountries" placeholder="List neighboring countries..."></textarea>
 
-    const ballCounterElement = document.getElementById('ballCounter');
+                            <label for="totalLandArea">Total Land Area:</label>
+                            <input type="text" id="totalLandArea" name="totalLandArea" placeholder="e.g., 148,000 sq km">
 
-    class Ball {
-      constructor(x, y, radius, dx, dy, color) {
-        this.x = x;
-        this.y = y;
-        this.radius = radius;
-        this.dx = dx;
-        this.dy = dy;
-        this.color = color;
-      }
+                            <button type="button" onclick="saveData('locationSizeForm')">Save</button>
+                        </form>
+                    </div>
+                </div>
 
-      draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fillStyle = this.color;
-        ctx.fill();
-        ctx.closePath();
-      }
+                <div class="accordion-item">
+                    <button class="accordion-button">Physical Features</button>
+                    <div class="accordion-content">
+                        <form id="physicalFeaturesForm">
+                            <label for="waterwaysPorts">Waterways and Ports:</label>
+                            <textarea id="waterwaysPorts" name="waterwaysPorts" placeholder="Describe major waterways and ports..."></textarea>
 
-      update() {
-        this.x += this.dx;
-        this.y += this.dy;
+                            <label for="topography">Topography:</label>
+                            <textarea id="topography" name="topography" placeholder="Describe the topography..."></textarea>
 
-        // Calculate distance from center
-        const distX = this.x - centerX;
-        const distY = this.y - centerY;
-        const distFromCenter = Math.sqrt(distX * distX + distY * distY);
+                            <label for="naturalResources">Natural Resources:</label>
+                            <textarea id="naturalResources" name="naturalResources" placeholder="List natural resources..."></textarea>
 
-        // Calculate the angle of the ball relative to the center
-        const ballAngle = Math.atan2(distY, distX);
-        let relativeAngle = ballAngle - angle;
-        // Normalize the angle between -PI and PI
-        relativeAngle = (relativeAngle + Math.PI) % (2 * Math.PI) - Math.PI;
+                            <label for="roadRailNetworks">Road and Rail Networks:</label>
+                            <textarea id="roadRailNetworks" name="roadRailNetworks" placeholder="Describe road and rail networks..."></textarea>
 
-        // Define the range of angles that represent the hole
-        const halfHole = holeAngle / 2;
-        const isInHoleRange = Math.abs(relativeAngle) < halfHole;
+                            <button type="button" onclick="saveData('physicalFeaturesForm')">Save</button>
+                        </form>
+                    </div>
+                </div>
 
-        // Check if the ball is attempting to exit through the hole
-        if (distFromCenter + this.radius > circleRadius && isInHoleRange) {
-          exitCount += 1; // Increment the counter
-          ballCounterElement.textContent = `Balls Exited: ${exitCount}`;
-          return true; // Ball has exited through the hole
-        }
+                <div class="accordion-item">
+                    <button class="accordion-button">Climate</button>
+                    <div class="accordion-content">
+                        <form id="climateForm">
+                            <label for="seasonalAbnormalities">Seasonal Abnormalities:</label>
+                            <textarea id="seasonalAbnormalities" name="seasonalAbnormalities" placeholder="Describe seasonal abnormalities..."></textarea>
 
-        // Handle collision with the circle's boundary only if not in the hole's range
-        if (distFromCenter + this.radius > circleRadius && !isInHoleRange) {
-          // Calculate normal vector
-          const normalX = distX / distFromCenter;
-          const normalY = distY / distFromCenter;
+                            <label for="characteristics">Characteristics:</label>
+                            <textarea id="characteristics" name="characteristics" placeholder="Describe climate characteristics..."></textarea>
 
-          // Calculate velocity dot normal
-          const dotProduct = this.dx * normalX + this.dy * normalY;
+                            <button type="button" onclick="saveData('climateForm')">Save</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-          // Reflect the velocity with added randomness
-          const reflectionFactor = 2; // Standard reflection
-          const randomAngle = (Math.random() - 0.5) * (Math.PI / 18); // +/-5 degrees in radians
+        <!-- Political Geography Section -->
+        <section id="PoliticalGeography" class="tabcontent">
+            <h2>Political Geography</h2>
+            <div class="accordion">
+                <div class="accordion-item">
+                    <button class="accordion-button">Politically Organized Areas</button>
+                    <div class="accordion-content">
+                        <form id="politicallyOrganizedAreasForm">
+                            <label for="regions">Regions:</label>
+                            <textarea id="regions" name="regions" placeholder="Describe political regions..."></textarea>
 
-          // Reflect the velocity
-          let newDx = (this.dx - reflectionFactor * dotProduct * normalX);
-          let newDy = (this.dy - reflectionFactor * dotProduct * normalY);
+                            <label for="administrationEffectiveness">Effectiveness of Administration:</label>
+                            <textarea id="administrationEffectiveness" name="administrationEffectiveness" placeholder="Describe effectiveness of administration..."></textarea>
 
-          // Apply small random perturbation
-          newDx += Math.cos(randomAngle) * 0.1;
-          newDy += Math.sin(randomAngle) * 0.1;
+                            <button type="button" onclick="saveData('politicallyOrganizedAreasForm')">Save</button>
+                        </form>
+                    </div>
+                </div>
 
-          this.dx = newDx;
-          this.dy = newDy;
+                <div class="accordion-item">
+                    <button class="accordion-button">Cities and Towns</button>
+                    <div class="accordion-content">
+                        <form id="citiesTownsForm">
+                            <label for="cities">Cities:</label>
+                            <textarea id="cities" name="cities" placeholder="List major cities and towns..."></textarea>
 
-          // Reposition the ball just inside the boundary to prevent sticking
-          this.x = centerX + normalX * (circleRadius - this.radius - 1);
-          this.y = centerY + normalY * (circleRadius - this.radius - 1);
-        }
+                            <button type="button" onclick="saveData('citiesTownsForm')">Save</button>
+                        </form>
+                    </div>
+                </div>
 
-        return false; // Ball has not exited
-      }
-    }
+                <div class="accordion-item">
+                    <button class="accordion-button">Boundaries</button>
+                    <div class="accordion-content">
+                        <form id="boundariesForm">
+                            <label for="landBoundaries">Land Boundaries:</label>
+                            <textarea id="landBoundaries" name="landBoundaries" placeholder="Describe land boundaries..."></textarea>
 
-    function spawnBall(initial = true) {
-      const colors = ['red', 'green', 'blue', 'yellow', 'purple', 'orange', 'cyan', 'magenta'];
-      const color = colors[Math.floor(Math.random() * colors.length)];
-      const speed = initial ? (Math.random() * 2 + 2) : (Math.random() * 3 + 1.5);
-      // Random direction
-      const spawnAngle = Math.random() * 2 * Math.PI;
-      const dx = Math.cos(spawnAngle) * speed;
-      const dy = Math.sin(spawnAngle) * speed;
-      const ball = new Ball(centerX, centerY, 10, dx, dy, color);
-      balls.push(ball);
-    }
+                            <label for="sourcesRawMaterials">Sources of Raw Materials:</label>
+                            <textarea id="sourcesRawMaterials" name="sourcesRawMaterials" placeholder="List sources of raw materials..."></textarea>
 
-    function drawSpinningCircle() {
-      ctx.save();
-      ctx.translate(centerX, centerY);
-      ctx.rotate(angle);
-      ctx.translate(-centerX, -centerY);
-      ctx.beginPath();
-      // Draw the circle with a hole by skipping the hole's arc
-      ctx.arc(centerX, centerY, circleRadius, holeAngle / 2, 2 * Math.PI - holeAngle / 2);
-      ctx.lineWidth = 5;
-      ctx.strokeStyle = 'white';
-      ctx.stroke();
-      ctx.restore();
-    }
+                            <button type="button" onclick="saveData('boundariesForm')">Save</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-    function animate() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+        <!-- Additional Sections -->
+        <section id="History" class="tabcontent">
+            <h2>History</h2>
+            <!-- Similar structure to Geography -->
+            <p>Content for History section...</p>
+        </section>
 
-      // Draw spinning circle with hole
-      drawSpinningCircle();
+        <section id="People" class="tabcontent">
+            <h2>People</h2>
+            <!-- Similar structure to Geography -->
+            <p>Content for People section...</p>
+        </section>
 
-      // Update and draw balls
-      for (let i = balls.length - 1; i >= 0; i--) {
-        const ball = balls[i];
-        ball.draw();
-        if (ball.update()) {
-          // Ball has exited through the hole
-          balls.splice(i, 1); // Remove the exited ball
-          spawnBall(false); // Spawn two new balls
-          spawnBall(false);
-        }
-      }
+        <section id="USInterests" class="tabcontent">
+            <h2>United States Interests</h2>
+            <!-- Similar structure to Geography -->
+            <p>Content for US Interests section...</p>
+        </section>
 
-      // Spin the circle
-      angle += 0.02; // Adjust rotation speed as needed
-      angle %= 2 * Math.PI; // Keep the angle within 0 to 2π
+        <section id="ForeignSupport" class="tabcontent">
+            <h2>Foreign Nation Support</h2>
+            <!-- Similar structure to Geography -->
+            <p>Content for Foreign Nation Support section...</p>
+        </section>
+    </main>
 
-      animationId = requestAnimationFrame(animate);
-    }
+    <footer>
+        <button onclick="downloadData()">Download Assessment</button>
+    </footer>
 
-    // Start the game
-    document.getElementById('startBtn').addEventListener('click', () => {
-      if (!gameStarted) {
-        gameStarted = true;
-        exitCount = 0; // Reset the counter
-        ballCounterElement.textContent = `Balls Exited: ${exitCount}`;
-        balls = []; // Clear existing balls
-        spawnBall(); // Spawn the first ball
-        animate();   // Start animation loop
-      }
-    });
-
-    // Reset the game
-    document.getElementById('resetBtn').addEventListener('click', () => {
-      cancelAnimationFrame(animationId); // Stop the animation
-      gameStarted = false;
-      balls = []; // Clear all balls
-      ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
-      angle = 0; // Reset rotation angle
-      exitCount = 0; // Reset the counter
-      ballCounterElement.textContent = `Balls Exited: ${exitCount}`;
-    });
-
-    // Optional: Allow resetting by pressing the 'R' key and starting with 'S'
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 's' || e.key === 'S') {
-        document.getElementById('startBtn').click();
-      }
-      if (e.key === 'r' || e.key === 'R') {
-        document.getElementById('resetBtn').click();
-      }
-    });
-  </script>
-
+    <script src="script.js"></script>
 </body>
 </html>
