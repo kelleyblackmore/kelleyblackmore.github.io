@@ -3,159 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CA Assessment Tool</title>
+    <title>My Portfolio</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <h1>Civil Affairs Assessment Tool</h1>
-    </header>
     <nav>
-        <button class="tablink" onclick="openSection(event, 'Geography')">Geography</button>
-        <button class="tablink" onclick="openSection(event, 'PoliticalGeography')">Political Geography</button>
-        <button class="tablink" onclick="openSection(event, 'History')">History</button>
-        <button class="tablink" onclick="openSection(event, 'People')">People</button>
-        <button class="tablink" onclick="openSection(event, 'USInterests')">US Interests</button>
-        <button class="tablink" onclick="openSection(event, 'ForeignSupport')">Foreign Nation Support</button>
+        <div class="nav-content">
+            <a href="/" class="logo">Portfolio</a>
+            <ul class="nav-links">
+                <li><a href="#about">About</a></li>
+                <li><a href="#projects">Projects</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
     </nav>
 
-    <main>
-        <!-- Geography Section -->
-        <section id="Geography" class="tabcontent">
-            <h2>Geography</h2>
-            <div class="accordion">
-                <div class="accordion-item">
-                    <button class="accordion-button">Location and Size</button>
-                    <div class="accordion-content">
-                        <form id="locationSizeForm">
-                            <label for="location">Location:</label>
-                            <textarea id="location" name="location" placeholder="Describe the location..."></textarea>
+    <header class="hero">
+        <div class="hero-content">
+            <h1>Welcome to My Portfolio</h1>
+            <p>Software Developer & DevOps Engineer</p>
+        </div>
+    </header>
 
-                            <label for="neighboringCountries">Neighboring Countries:</label>
-                            <textarea id="neighboringCountries" name="neighboringCountries" placeholder="List neighboring countries..."></textarea>
+    <section id="about" class="section">
+        <h2>About Me</h2>
+        <p>I'm a passionate developer focused on creating efficient and scalable solutions. With expertise in DevOps and software development, I bring ideas to life through code.</p>
+    </section>
 
-                            <label for="totalLandArea">Total Land Area:</label>
-                            <input type="text" id="totalLandArea" name="totalLandArea" placeholder="e.g., 148,000 sq km">
-
-                            <button type="button" onclick="saveData('locationSizeForm')">Save</button>
-                        </form>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <button class="accordion-button">Physical Features</button>
-                    <div class="accordion-content">
-                        <form id="physicalFeaturesForm">
-                            <label for="waterwaysPorts">Waterways and Ports:</label>
-                            <textarea id="waterwaysPorts" name="waterwaysPorts" placeholder="Describe major waterways and ports..."></textarea>
-
-                            <label for="topography">Topography:</label>
-                            <textarea id="topography" name="topography" placeholder="Describe the topography..."></textarea>
-
-                            <label for="naturalResources">Natural Resources:</label>
-                            <textarea id="naturalResources" name="naturalResources" placeholder="List natural resources..."></textarea>
-
-                            <label for="roadRailNetworks">Road and Rail Networks:</label>
-                            <textarea id="roadRailNetworks" name="roadRailNetworks" placeholder="Describe road and rail networks..."></textarea>
-
-                            <button type="button" onclick="saveData('physicalFeaturesForm')">Save</button>
-                        </form>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <button class="accordion-button">Climate</button>
-                    <div class="accordion-content">
-                        <form id="climateForm">
-                            <label for="seasonalAbnormalities">Seasonal Abnormalities:</label>
-                            <textarea id="seasonalAbnormalities" name="seasonalAbnormalities" placeholder="Describe seasonal abnormalities..."></textarea>
-
-                            <label for="characteristics">Characteristics:</label>
-                            <textarea id="characteristics" name="characteristics" placeholder="Describe climate characteristics..."></textarea>
-
-                            <button type="button" onclick="saveData('climateForm')">Save</button>
-                        </form>
-                    </div>
-                </div>
+    <section id="projects" class="section">
+        <h2>Projects</h2>
+        <div class="projects-grid">
+            <div class="project-card">
+                <h3>Project 1</h3>
+                <p>DevOps Pipeline Implementation</p>
             </div>
-        </section>
-
-        <!-- Political Geography Section -->
-        <section id="PoliticalGeography" class="tabcontent">
-            <h2>Political Geography</h2>
-            <div class="accordion">
-                <div class="accordion-item">
-                    <button class="accordion-button">Politically Organized Areas</button>
-                    <div class="accordion-content">
-                        <form id="politicallyOrganizedAreasForm">
-                            <label for="regions">Regions:</label>
-                            <textarea id="regions" name="regions" placeholder="Describe political regions..."></textarea>
-
-                            <label for="administrationEffectiveness">Effectiveness of Administration:</label>
-                            <textarea id="administrationEffectiveness" name="administrationEffectiveness" placeholder="Describe effectiveness of administration..."></textarea>
-
-                            <button type="button" onclick="saveData('politicallyOrganizedAreasForm')">Save</button>
-                        </form>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <button class="accordion-button">Cities and Towns</button>
-                    <div class="accordion-content">
-                        <form id="citiesTownsForm">
-                            <label for="cities">Cities:</label>
-                            <textarea id="cities" name="cities" placeholder="List major cities and towns..."></textarea>
-
-                            <button type="button" onclick="saveData('citiesTownsForm')">Save</button>
-                        </form>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <button class="accordion-button">Boundaries</button>
-                    <div class="accordion-content">
-                        <form id="boundariesForm">
-                            <label for="landBoundaries">Land Boundaries:</label>
-                            <textarea id="landBoundaries" name="landBoundaries" placeholder="Describe land boundaries..."></textarea>
-
-                            <label for="sourcesRawMaterials">Sources of Raw Materials:</label>
-                            <textarea id="sourcesRawMaterials" name="sourcesRawMaterials" placeholder="List sources of raw materials..."></textarea>
-
-                            <button type="button" onclick="saveData('boundariesForm')">Save</button>
-                        </form>
-                    </div>
-                </div>
+            <div class="project-card">
+                <h3>Project 2</h3>
+                <p>Web Application Development</p>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- Additional Sections -->
-        <section id="History" class="tabcontent">
-            <h2>History</h2>
-            <!-- Similar structure to Geography -->
-            <p>Content for History section...</p>
-        </section>
-
-        <section id="People" class="tabcontent">
-            <h2>People</h2>
-            <!-- Similar structure to Geography -->
-            <p>Content for People section...</p>
-        </section>
-
-        <section id="USInterests" class="tabcontent">
-            <h2>United States Interests</h2>
-            <!-- Similar structure to Geography -->
-            <p>Content for US Interests section...</p>
-        </section>
-
-        <section id="ForeignSupport" class="tabcontent">
-            <h2>Foreign Nation Support</h2>
-            <!-- Similar structure to Geography -->
-            <p>Content for Foreign Nation Support section...</p>
-        </section>
-    </main>
+    <section id="contact" class="section">
+        <h2>Contact</h2>
+        <div class="contact-form">
+            <form id="contactForm">
+                <input type="email" placeholder="Your Email" required>
+                <textarea placeholder="Your Message" required></textarea>
+                <button type="submit">Send Message</button>
+            </form>
+        </div>
+    </section>
 
     <footer>
-        <button onclick="downloadData()">Download Assessment</button>
+        <p>&copy; 2024 Portfolio. All rights reserved.</p>
     </footer>
 
     <script src="script.js"></script>
