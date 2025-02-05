@@ -30,18 +30,12 @@
 
     <section id="blog-posts" class="section">
         <h2>Recent Posts</h2>
+        {% for post in site.posts %}
         <div class="blog-post">
-            <h3><a href="_posts/2024-01-01-welcome-to-my-blog.md">Welcome to My Blog</a></h3>
-            <p>Welcome to my blog! This is where I'll be sharing my thoughts, experiences, and insights on various topics related to software development, DevOps, and technology in general. Stay tuned for updates and feel free to reach out if you have any questions or suggestions.</p>
+            <h3><a href="{{ post.url }}">{{ post.title }}</a></h3>
+            <p>{{ post.excerpt }}</p>
         </div>
-        <div class="blog-post">
-            <h3><a href="_posts/2024-01-02-devops-pipeline.md">DevOps Pipeline</a></h3>
-            <p>In this blog post, I will explain the DevOps pipeline implementation that I have used in my projects. The DevOps pipeline is a set of automated processes that allow developers and operations teams to work together to build, test, and deploy software. It helps to ensure that code changes are tested and deployed quickly and reliably.</p>
-        </div>
-        <div class="blog-post">
-            <h3><a href="_posts/2024-01-03-web-application-development.md">Web Application Development</a></h3>
-            <p>In this blog post, I will discuss various techniques and best practices for web application development. Web application development involves creating dynamic and interactive websites that provide a seamless user experience.</p>
-        </div>
+        {% endfor %}
     </section>
 
     <footer>

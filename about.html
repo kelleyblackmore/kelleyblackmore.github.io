@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Documentation</title>
+    <title>About</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -23,19 +23,14 @@
 
     <header class="hero">
         <div class="hero-content">
-            <h1>Documentation</h1>
-            <p>Detailed information about my projects</p>
+            <h1>About Me</h1>
+            <p>I'm a passionate developer focused on creating efficient and scalable solutions. With expertise in DevOps and software development, I bring ideas to life through code.</p>
         </div>
     </header>
 
-    <section id="documentation" class="section">
-        <h2>Documentation Pages</h2>
-        {% for doc in site.docs %}
-        <div class="documentation-page">
-            <h3><a href="{{ doc.url }}">{{ doc.title }}</a></h3>
-            <p>{{ doc.excerpt }}</p>
-        </div>
-        {% endfor %}
+    <section id="about" class="section">
+        <h2>About Me</h2>
+        <p>I'm a passionate developer focused on creating efficient and scalable solutions. With expertise in DevOps and software development, I bring ideas to life through code.</p>
     </section>
 
     <footer>
