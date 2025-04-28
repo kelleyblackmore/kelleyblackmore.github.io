@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/kelleyblackmore/kelleyblackmore.github.io/static/css/main.b3b6e4fa.css",
+    "main.js": "/kelleyblackmore/kelleyblackmore.github.io/static/js/main.9bf82f0b.js",
+    "index.html": "/kelleyblackmore/kelleyblackmore.github.io/index.html",
+    "main.b3b6e4fa.css.map": "/kelleyblackmore/kelleyblackmore.github.io/static/css/main.b3b6e4fa.css.map",
+    "main.9bf82f0b.js.map": "/kelleyblackmore/kelleyblackmore.github.io/static/js/main.9bf82f0b.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.b3b6e4fa.css",
+    "static/js/main.9bf82f0b.js"
+  ]
+}

@@ -1,0 +1,2 @@
+Please replace this file with a proper favicon.ico file.
+You can create one using online tools like https://favicon.io/ or https://realfavicongenerator.net/ 
