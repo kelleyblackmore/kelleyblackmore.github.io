@@ -2,7 +2,7 @@
 # Common files to ignore for a HTML/CSS/JS site
 node_modules/
 dist/
-build/
+
 .DS_Store
 *.log
 .npm/
