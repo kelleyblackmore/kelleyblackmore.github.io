@@ -36,6 +36,10 @@ jobs:
           echo "Build verified successfully."
 
       - name: Deploy to GitHub Pages
-        run: npm run deploy
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
+          npm run deploy
         env:
           CI: false
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
