@@ -4,28 +4,28 @@ import { motion } from 'framer-motion';
 const Projects = () => {
   const projects = [
     {
-      title: 'Project One',
-      description: 'A modern web application built with React and Node.js, featuring real-time updates and responsive design.',
-      technologies: ['React', 'Node.js', 'MongoDB', 'Socket.io'],
-      image: '/project1.jpg',
-      github: 'https://github.com/kelleyblackmore/project1',
-      demo: 'https://project1.demo'
+      title: 'Personal Portfolio Website',
+      description: 'A modern, responsive portfolio website built with React and Tailwind CSS, featuring dark mode support and smooth animations.',
+      technologies: ['React', 'Tailwind CSS', 'Framer Motion', 'GitHub Pages'],
+      image: '/portfolio.jpg',
+      github: 'https://github.com/kelleyblackmore/kelleyblackmore.github.io',
+      demo: 'https://kelleyblackmore.github.io'
     },
     {
-      title: 'Project Two',
-      description: 'An AI-powered data analysis tool that helps businesses make data-driven decisions.',
-      technologies: ['Python', 'TensorFlow', 'React', 'AWS'],
-      image: '/project2.jpg',
-      github: 'https://github.com/kelleyblackmore/project2',
-      demo: 'https://project2.demo'
+      title: 'Cloud Infrastructure Automation',
+      description: 'Infrastructure as Code project using Terraform to automate cloud resource provisioning and management across multiple environments.',
+      technologies: ['Terraform', 'AWS', 'Docker', 'CI/CD'],
+      image: '/cloud-infra.jpg',
+      github: 'https://github.com/kelleyblackmore/cloud-infrastructure',
+      demo: null
     },
     {
-      title: 'Project Three',
-      description: 'A full-stack e-commerce platform with payment integration and inventory management.',
-      technologies: ['React', 'Node.js', 'PostgreSQL', 'Stripe'],
-      image: '/project3.jpg',
-      github: 'https://github.com/kelleyblackmore/project3',
-      demo: 'https://project3.demo'
+      title: 'Microservices API Gateway',
+      description: 'A scalable API gateway built with Node.js and Express, implementing rate limiting, authentication, and request routing for microservices.',
+      technologies: ['Node.js', 'Express', 'Redis', 'Docker'],
+      image: '/api-gateway.jpg',
+      github: 'https://github.com/kelleyblackmore/api-gateway',
+      demo: null
     }
   ];
 

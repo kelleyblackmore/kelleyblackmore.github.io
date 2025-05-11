@@ -8,10 +8,23 @@ const Contact = () => {
     message: ''
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Add your form submission logic here
-    console.log('Form submitted:', formData);
+    try {
+      // You can implement your preferred form submission method here
+      // For example, using EmailJS, Formspree, or your own backend
+      console.log('Form submitted:', formData);
+      // Reset form after successful submission
+      setFormData({
+        name: '',
+        email: '',
+        message: ''
+      });
+      alert('Thank you for your message! I will get back to you soon.');
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert('There was an error sending your message. Please try again later.');
+    }
   };
 
   const handleChange = (e) => {
@@ -112,10 +125,10 @@ const Contact = () => {
             <p className="text-gray-600 dark:text-gray-300">
               Or reach out directly at{' '}
               <a
-                href="mailto:your.email@example.com"
+                href="mailto:kelley.blackmore@gmail.com"
                 className="text-blue-600 dark:text-blue-400 hover:underline"
               >
-                your.email@example.com
+                kelley.blackmore@gmail.com
               </a>
             </p>
           </motion.div>

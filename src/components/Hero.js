@@ -15,7 +15,7 @@ const Hero = () => {
               Hi, I'm <span className="text-blue-600 dark:text-blue-400">Kelley Blackmore</span>
             </h1>
             <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 mb-8">
-              Software Engineer & Problem Solver
+              Full Stack Developer & Cloud Enthusiast
             </p>
             <motion.div
               initial={{ opacity: 0 }}

@@ -5,7 +5,8 @@ const About = () => {
   const skills = [
     'JavaScript', 'React', 'Node.js', 'Python',
     'TypeScript', 'SQL', 'AWS', 'Docker',
-    'Git', 'CI/CD', 'REST APIs', 'GraphQL'
+    'Git', 'CI/CD', 'REST APIs', 'GraphQL',
+    'Kubernetes', 'Terraform', 'Microservices'
   ];
 
   return (
@@ -33,12 +34,13 @@ const About = () => {
             className="space-y-6"
           >
             <p className="text-lg text-gray-600 dark:text-gray-300">
-              I'm a passionate software engineer with a keen eye for creating elegant solutions to complex problems. 
-              With experience in full-stack development, I enjoy building scalable applications and learning new technologies.
+              I'm a passionate full-stack developer with a strong focus on cloud-native applications and scalable architectures. 
+              With expertise in modern web technologies and cloud platforms, I specialize in building robust, maintainable, and user-friendly applications.
             </p>
             <p className="text-lg text-gray-600 dark:text-gray-300">
-              When I'm not coding, you can find me exploring new technologies, contributing to open-source projects, 
-              or sharing my knowledge with the developer community.
+              My journey in tech has led me through various roles where I've gained deep experience in both frontend and backend development,
+              with a particular interest in cloud infrastructure and DevOps practices. I'm always eager to learn new technologies
+              and share knowledge with the developer community.
             </p>
           </motion.div>
 
