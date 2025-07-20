@@ -57,7 +57,7 @@ const Hero = () => {
                 </svg>
               </a>
               <a
-                href="https://linkedin.com/in/kelleyblackmore"
+                href="https://www.linkedin.com/in/kkelleydev/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
