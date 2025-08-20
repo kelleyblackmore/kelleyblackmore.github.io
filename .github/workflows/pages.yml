@@ -24,7 +24,7 @@ jobs:
           cache: npm
       - name: Configure Pages
         uses: actions/configure-pages@v5
-  - run: npm install --no-audit --no-fund
+      - run: npm install --no-audit --no-fund
       - run: npm run build
       - run: cp build/index.html build/404.html
       - uses: actions/upload-pages-artifact@v3
