@@ -27,6 +27,31 @@ const Projects = () => {
       github: 'https://github.com/kelleyblackmore/localstorage-manager',
       demo: 'https://kelleyblackmore.github.io/localstorage-manager'
     }
+    ,
+    {
+      title: 'Serverless Image Resizer',
+      description: 'On-demand image transformation pipeline using AWS Lambda, S3, CloudFront signed URLs, and sharp for fast, cached delivery across devices.',
+      technologies: ['AWS Lambda', 'S3', 'CloudFront', 'Node.js', 'sharp'],
+      image: '/image-resizer.jpg',
+      github: null,
+      demo: null
+    },
+    {
+      title: 'Kanban Task Manager',
+      description: 'A drag-and-drop Kanban board with persistent state, keyboard navigation, and theme support.',
+      technologies: ['React', 'React DnD', 'LocalStorage', 'Tailwind CSS'],
+      image: '/kanban.jpg',
+      github: null,
+      demo: null
+    },
+    {
+      title: 'Server Status Dashboard',
+      description: 'Real-time system metrics dashboard with charts, alerts, and historical trends.',
+      technologies: ['React', 'WebSockets', 'Express', 'Chart.js'],
+      image: '/status-dashboard.jpg',
+      github: null,
+      demo: null
+    }
   ];
 
   return (
