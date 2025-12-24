@@ -1,0 +1,1 @@
+{"version":3,"file":"static/css/main.3293082e.css","mappings":"AACA,gBAAoB,WAAc,CAClC,KAAO,QAAW","sources":["index.css"],"sourcesContent":["/* Minimal base styles; Tailwind is loaded via CDN in public/index.html */\nhtml, body, #root { height: 100%; }\nbody { margin: 0; }\n"],"names":[],"sourceRoot":""}

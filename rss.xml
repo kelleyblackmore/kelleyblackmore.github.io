@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+  <rss version="2.0">
+    <channel>
+      <title>Kelley Blackmore — Blog</title>
+      <link>https://kelleyblackmore.github.io</link>
+      <description>Updates and project notes</description>
+      
+    <item>
+      <title><![CDATA[Hello — My first post]]></title>
+      <link>https://kelleyblackmore.github.io/posts/example-post-1.html</link>
+      <pubDate>Wed, 24 Dec 2025 00:00:00 GMT</pubDate>
+      <description><![CDATA[Welcome to my new blog — I'll share projects and notes here.]]></description>
+      <guid>https://kelleyblackmore.github.io/posts/example-post-1</guid>
+    </item>
+
+    <item>
+      <title><![CDATA[Project highlights]]></title>
+      <link>https://kelleyblackmore.github.io/posts/example-post-2.html</link>
+      <pubDate>Sat, 20 Dec 2025 00:00:00 GMT</pubDate>
+      <description><![CDATA[A quick look at recent projects.]]></description>
+      <guid>https://kelleyblackmore.github.io/posts/example-post-2</guid>
+    </item>
+    </channel>
+  </rss>
