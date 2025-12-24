@@ -1,0 +1,18 @@
+[
+  {
+    "slug": "example-post-1",
+    "title": "Hello — My first post",
+    "date": "2025-12-24",
+    "excerpt": "Welcome to my new blog — I'll share projects and notes here.",
+    "tags": [],
+    "path": "/posts/example-post-1.md"
+  },
+  {
+    "slug": "example-post-2",
+    "title": "Project highlights",
+    "date": "2025-12-20",
+    "excerpt": "A quick look at recent projects.",
+    "tags": [],
+    "path": "/posts/example-post-2.md"
+  }
+]
