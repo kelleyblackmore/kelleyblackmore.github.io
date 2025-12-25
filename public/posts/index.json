@@ -1,5 +1,27 @@
 [
   {
+    "slug": "2025-12-25-deploying-with-github-pages",
+    "title": "Deploying with GitHub Pages",
+    "date": "2025-12-25",
+    "excerpt": "How I deploy this portfolio using GitHub Pages and `gh-pages`.",
+    "tags": [
+      "deploy",
+      "github-pages"
+    ],
+    "path": "/posts/2025-12-25-deploying-with-github-pages.md"
+  },
+  {
+    "slug": "2025-12-25-getting-started-with-rust",
+    "title": "Getting started with Rust",
+    "date": "2025-12-25",
+    "excerpt": "A short guide to get started with Rust and why I like it for systems work.",
+    "tags": [
+      "rust",
+      "tutorial"
+    ],
+    "path": "/posts/2025-12-25-getting-started-with-rust.md"
+  },
+  {
     "slug": "example-post-1",
     "title": "Hello — My first post",
     "date": "2025-12-24",
