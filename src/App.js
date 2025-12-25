@@ -7,6 +7,7 @@ import Contact from './components/Contact';
 import Blog from './components/Blog';
 import Post from './components/Post';
 import TagPage from './components/TagPage';
+import ProjectsPage from './components/ProjectsPage';
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<Post />} />
           <Route path="/tag/:tag" element={<TagPage />} />
+          <Route path="/projects" element={<ProjectsPage />} />
         </Routes>
       </main>
 
