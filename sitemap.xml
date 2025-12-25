@@ -2,6 +2,8 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://kelleyblackmore.github.io/</loc></url>
   <url><loc>https://kelleyblackmore.github.io/blog</loc></url>
+  <url><loc>https://kelleyblackmore.github.io/blog/2025-12-25-deploying-with-github-pages</loc></url>
+  <url><loc>https://kelleyblackmore.github.io/blog/2025-12-25-getting-started-with-rust</loc></url>
   <url><loc>https://kelleyblackmore.github.io/blog/example-post-1</loc></url>
   <url><loc>https://kelleyblackmore.github.io/blog/example-post-2</loc></url>
 </urlset>

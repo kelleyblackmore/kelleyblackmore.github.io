@@ -6,6 +6,22 @@
       <description>Updates and project notes</description>
       
     <item>
+      <title><![CDATA[Deploying with GitHub Pages]]></title>
+      <link>https://kelleyblackmore.github.io/posts/2025-12-25-deploying-with-github-pages.html</link>
+      <pubDate>Thu, 25 Dec 2025 00:00:00 GMT</pubDate>
+      <description><![CDATA[How I deploy this portfolio using GitHub Pages and `gh-pages`.]]></description>
+      <guid>https://kelleyblackmore.github.io/posts/2025-12-25-deploying-with-github-pages</guid>
+    </item>
+
+    <item>
+      <title><![CDATA[Getting started with Rust]]></title>
+      <link>https://kelleyblackmore.github.io/posts/2025-12-25-getting-started-with-rust.html</link>
+      <pubDate>Thu, 25 Dec 2025 00:00:00 GMT</pubDate>
+      <description><![CDATA[A short guide to get started with Rust and why I like it for systems work.]]></description>
+      <guid>https://kelleyblackmore.github.io/posts/2025-12-25-getting-started-with-rust</guid>
+    </item>
+
+    <item>
       <title><![CDATA[Hello — My first post]]></title>
       <link>https://kelleyblackmore.github.io/posts/example-post-1.html</link>
       <pubDate>Wed, 24 Dec 2025 00:00:00 GMT</pubDate>
