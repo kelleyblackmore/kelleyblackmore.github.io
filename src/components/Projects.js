@@ -4,52 +4,52 @@ import { motion } from 'framer-motion';
 const Projects = () => {
   const projects = [
     {
-      title: 'Personal Portfolio Website',
-      description: 'A modern, responsive portfolio website built with React and Tailwind CSS, featuring dark mode support, smooth animations, and showcasing my latest projects and skills.',
-      technologies: ['React', 'Tailwind CSS', 'Framer Motion', 'GitHub Pages'],
-      image: '/portfolio.jpg',
+      title: 'Automatic-Secret-Rotation',
+      description:
+        'Rust built automatic secret key rotation — secure, automated key management for services.',
+      technologies: ['Rust', 'Security', 'CLI'],
+      image: '/projects/auto-rotation.png',
+      github: 'https://github.com/kelleyblackmore/Automatic-Secret-Rotation',
+      demo: null
+    },
+    {
+      title: 'Portfolio Website',
+      description: 'This website — a modern React + Tailwind portfolio with blog and projects.',
+      technologies: ['React', 'Tailwind CSS', 'Framer Motion'],
+      image: '/projects/portfolio.png',
       github: 'https://github.com/kelleyblackmore/kelleyblackmore.github.io',
       demo: 'https://kelleyblackmore.github.io'
     },
     {
-      title: 'QuizPort.io',
-      description: 'A comprehensive quiz platform that enables users to create, manage, and take interactive quizzes. Features include real-time scoring, analytics, user management, and customizable quiz formats.',
-      technologies: ['React', 'Node.js', 'MongoDB', 'Express', 'Socket.io'],
-      image: '/quizport.jpg',
-      github: null, // Private repository
-      demo: 'https://quizport.io'
-    },
-    {
-      title: 'LocalStorage Manager',
-      description: 'A robust client-side storage solution that provides advanced local storage management with features like data persistence, encryption, compression, and seamless synchronization across browser tabs.',
-      technologies: ['JavaScript', 'WebCrypto API', 'IndexedDB', 'Service Workers'],
-      image: '/localstorage.jpg',
-      github: 'https://github.com/kelleyblackmore/localstorage-manager',
-      demo: 'https://kelleyblackmore.github.io/localstorage-manager'
-    }
-    ,
-    {
-      title: 'Serverless Image Resizer',
-      description: 'On-demand image transformation pipeline using AWS Lambda, S3, CloudFront signed URLs, and sharp for fast, cached delivery across devices.',
-      technologies: ['AWS Lambda', 'S3', 'CloudFront', 'Node.js', 'sharp'],
-      image: '/image-resizer.jpg',
-      github: null,
+      title: 'open-webui',
+      description: 'User-friendly AI interface supporting multiple backends (Ollama, OpenAI, etc.).',
+      technologies: ['React', 'API', 'AI'],
+      image: '/projects/open-webui.png',
+      github: 'https://github.com/kelleyblackmore/open-webui',
       demo: null
     },
     {
-      title: 'Kanban Task Manager',
-      description: 'A drag-and-drop Kanban board with persistent state, keyboard navigation, and theme support.',
-      technologies: ['React', 'React DnD', 'LocalStorage', 'Tailwind CSS'],
-      image: '/kanban.jpg',
-      github: null,
+      title: 'tictac',
+      description: 'React application deployment example demonstrating cloud deployment patterns.',
+      technologies: ['React', 'Deployment', 'AWS'],
+      image: '/projects/tictac.png',
+      github: 'https://github.com/kelleyblackmore/tictac',
       demo: null
     },
     {
-      title: 'Server Status Dashboard',
-      description: 'Real-time system metrics dashboard with charts, alerts, and historical trends.',
-      technologies: ['React', 'WebSockets', 'Express', 'Chart.js'],
-      image: '/status-dashboard.jpg',
-      github: null,
+      title: 'terraform-aws-compute-ec2',
+      description: 'Terraform module for AWS compute resources — opinionated EC2 provisioning.',
+      technologies: ['Terraform', 'AWS', 'Infrastructure'],
+      image: '/projects/terraform.png',
+      github: 'https://github.com/kelleyblackmore/terraform-aws-compute-ec2',
+      demo: null
+    },
+    {
+      title: 'goss',
+      description: 'Quick and easy server testing/validation tool for infrastructure checks.',
+      technologies: ['Go', 'Testing', 'CI'],
+      image: '/projects/goss.png',
+      github: 'https://github.com/kelleyblackmore/goss',
       demo: null
     }
   ];
