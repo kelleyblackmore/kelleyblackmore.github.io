@@ -16,10 +16,10 @@ function App() {
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link to="/" className="font-bold text-lg">Kelley Blackmore</Link>
           <div className="space-x-6">
-            <Link to={"/#about"} className="hover:text-blue-600">About</Link>
-            <Link to={"/#projects"} className="hover:text-blue-600">Projects</Link>
+            <a href="#about" className="hover:text-blue-600">About</a>
+            <a href="#projects" className="hover:text-blue-600">Projects</a>
             <Link to="/blog" className="hover:text-blue-600">Blog</Link>
-            <Link to={"/#contact"} className="hover:text-blue-600">Contact</Link>
+            <a href="#contact" className="hover:text-blue-600">Contact</a>
           </div>
         </nav>
       </header>
