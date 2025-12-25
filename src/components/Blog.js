@@ -28,32 +28,33 @@ export default function Blog({ initialTag = null }) {
 
   return (
     <section className="max-w-4xl mx-auto py-20 px-4">
-      <h2 className="text-3xl font-bold mb-6">Blog</h2>
+      <h2 className="text-4xl font-bold mb-2 text-gray-900 dark:text-white">Blog</h2>
+      <div className="w-24 h-1 bg-blue-600 mb-8"></div>
       {tags.length > 0 && (
-        <div className="mb-4 flex flex-wrap gap-2">
-          <button onClick={() => setTag(null)} className={`px-3 py-1 rounded ${!tag ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-800'}`}>All</button>
+        <div className="mb-8 flex flex-wrap gap-2">
+          <button onClick={() => setTag(null)} className={`px-4 py-2 rounded-lg font-medium transition ${!tag ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700'}`}>All</button>
           {tags.map(t => (
-            <button key={t} onClick={() => setTag(t)} className={`px-3 py-1 rounded ${tag===t ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-800'}`}>{t}</button>
+            <button key={t} onClick={() => setTag(t)} className={`px-4 py-2 rounded-lg font-medium transition ${tag===t ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700'}`}>{t}</button>
           ))}
         </div>
       )}
 
-      {shown.length === 0 && <p>No posts yet.</p>}
-      <ul className="space-y-4">
+      {shown.length === 0 && <p className="text-gray-600 dark:text-gray-400 text-lg">No posts yet.</p>}
+      <ul className="space-y-6">
         {shown.map(p => (
-          <li key={p.slug} className="border rounded p-4">
-            <Link to={`/blog/${p.slug}`} className="text-xl font-semibold hover:text-blue-600">{p.title}</Link>
-            <p className="text-sm text-gray-500">{p.date}</p>
-            {p.excerpt && <p className="mt-2 text-gray-700 dark:text-gray-300">{p.excerpt}</p>}
-            {p.tags && p.tags.length > 0 && <p className="mt-2 text-sm">{p.tags.map(t => <span key={t} className="mr-2 text-xs px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded">{t}</span>)}</p>}
+          <li key={p.slug} className="border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:shadow-lg transition dark:bg-gray-800/50">
+            <Link to={`/blog/${p.slug}`} className="text-2xl font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition">{p.title}</Link>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{p.date}</p>
+            {p.excerpt && <p className="mt-3 text-gray-700 dark:text-gray-300 leading-relaxed">{p.excerpt}</p>}
+            {p.tags && p.tags.length > 0 && <div className="mt-3 flex flex-wrap gap-2">{p.tags.map(t => <span key={t} className="text-xs px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full font-medium">{t}</span>)}</div>}
           </li>
         ))}
       </ul>
 
-      <div className="mt-6 flex items-center gap-3">
-        <button onClick={() => setPage(p => Math.max(1, p-1))} disabled={page<=1} className="px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded">Prev</button>
-        <span>Page {page} / {totalPages}</span>
-        <button onClick={() => setPage(p => Math.min(totalPages, p+1))} disabled={page>=totalPages} className="px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded">Next</button>
+      <div className="mt-8 flex items-center justify-center gap-4">
+        <button onClick={() => setPage(p => Math.max(1, p-1))} disabled={page<=1} className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition">Prev</button>
+        <span className="text-gray-700 dark:text-gray-300 font-medium">Page {page} / {totalPages}</span>
+        <button onClick={() => setPage(p => Math.min(totalPages, p+1))} disabled={page>=totalPages} className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition">Next</button>
       </div>
     </section>
   );

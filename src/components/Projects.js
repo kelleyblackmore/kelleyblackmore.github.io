@@ -8,7 +8,7 @@ const Projects = () => {
       description:
         'Rust built automatic secret key rotation — secure, automated key management for services.',
       technologies: ['Rust', 'Security', 'CLI'],
-      image: '/projects/auto-rotation.png',
+      image: '/images/placeholder.svg',
       github: 'https://github.com/kelleyblackmore/Automatic-Secret-Rotation',
       demo: null
     },
@@ -16,7 +16,7 @@ const Projects = () => {
       title: 'Portfolio Website',
       description: 'This website — a modern React + Tailwind portfolio with blog and projects.',
       technologies: ['React', 'Tailwind CSS', 'Framer Motion'],
-      image: '/projects/portfolio.png',
+      image: '/images/placeholder.svg',
       github: 'https://github.com/kelleyblackmore/kelleyblackmore.github.io',
       demo: 'https://kelleyblackmore.github.io'
     },
@@ -24,7 +24,7 @@ const Projects = () => {
       title: 'open-webui',
       description: 'User-friendly AI interface supporting multiple backends (Ollama, OpenAI, etc.).',
       technologies: ['React', 'API', 'AI'],
-      image: '/projects/open-webui.png',
+      image: '/images/placeholder.svg',
       github: 'https://github.com/kelleyblackmore/open-webui',
       demo: null
     },
@@ -32,7 +32,7 @@ const Projects = () => {
       title: 'tictac',
       description: 'React application deployment example demonstrating cloud deployment patterns.',
       technologies: ['React', 'Deployment', 'AWS'],
-      image: '/projects/tictac.png',
+      image: '/images/placeholder.svg',
       github: 'https://github.com/kelleyblackmore/tictac',
       demo: null
     },
@@ -40,7 +40,7 @@ const Projects = () => {
       title: 'terraform-aws-compute-ec2',
       description: 'Terraform module for AWS compute resources — opinionated EC2 provisioning.',
       technologies: ['Terraform', 'AWS', 'Infrastructure'],
-      image: '/projects/terraform.png',
+      image: '/images/placeholder.svg',
       github: 'https://github.com/kelleyblackmore/terraform-aws-compute-ec2',
       demo: null
     },
@@ -48,7 +48,7 @@ const Projects = () => {
       title: 'goss',
       description: 'Quick and easy server testing/validation tool for infrastructure checks.',
       technologies: ['Go', 'Testing', 'CI'],
-      image: '/projects/goss.png',
+      image: '/images/placeholder.svg',
       github: 'https://github.com/kelleyblackmore/goss',
       demo: null
     }
@@ -64,9 +64,12 @@ const Projects = () => {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">
             Featured Projects
           </h2>
+          <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-6">
+            A selection of projects showcasing my experience with modern development, DevOps, and infrastructure.
+          </p>
           <div className="w-24 h-1 bg-blue-600 mx-auto"></div>
         </motion.div>
 
@@ -76,42 +79,44 @@ const Projects = () => {
               key={project.title}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              whileHover={{ scale: 1.02, y: -6 }}
+              whileHover={{ scale: 1.05, y: -8 }}
               transition={{ duration: 0.5, delay: index * 0.06 }}
               viewport={{ once: true }}
-              className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300"
+              className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col"
             >
-              <div className="relative h-48">
+              <div className="relative h-48 bg-gray-200 dark:bg-gray-700 overflow-hidden">
                 <img
                   src={project.image}
                   alt={project.title}
                   className="w-full h-full object-cover"
+                  onError={(e) => {e.target.src = '/images/placeholder.svg'}}
                 />
               </div>
-              <div className="p-6">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              <div className="p-6 flex flex-col flex-grow">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
                   {project.title}
                 </h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm leading-relaxed flex-grow">
                   {project.description}
                 </p>
-                <div className="flex flex-wrap gap-2 mb-4">
+                <div className="flex flex-wrap gap-2 mb-5">
                   {project.technologies.map((tech) => (
                     <span
                       key={tech}
-                      className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-full text-sm"
+                      className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-xs font-medium"
                     >
                       {tech}
                     </span>
                   ))}
                 </div>
-                <div className="flex space-x-4">
+                <div className="flex space-x-4 border-t border-gray-200 dark:border-gray-700 pt-4">
                   {project.github && (
                     <a
                       href={project.github}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                      className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
+                      title="View on GitHub"
                     >
                       <span className="sr-only">GitHub</span>
                       <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
@@ -124,17 +129,18 @@ const Projects = () => {
                       href={project.demo}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                      className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
+                      title="View Live Demo"
                     >
                       <span className="sr-only">Live Demo</span>
                       <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4m-4-6l6-6m0 0l-6 6" />
                       </svg>
                     </a>
                   )}
                   {!project.github && !project.demo && (
-                    <span className="text-gray-400 dark:text-gray-500 text-sm">
-                      Private Repository
+                    <span className="text-gray-400 dark:text-gray-500 text-xs font-medium">
+                      Private Repo
                     </span>
                   )}
                 </div>
