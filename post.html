@@ -121,7 +121,7 @@
 
     if (!slug) { show('state-error'); }
     else {
-      fetch(`/posts/${slug}.md`)
+      fetch(`/posts/${slug}.txt`)
         .then(r => { if (!r.ok) throw new Error('not found'); return r.text(); })
         .then(raw => {
           // Parse YAML front matter
