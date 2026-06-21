@@ -1,5 +1,13 @@
 [
   {
+    "slug": "2026-06-21-llm-agent-jira-stories",
+    "title": "Using an LLM Agent to Write Good Jira Stories",
+    "date": "2026-06-21",
+    "excerpt": "How to prompt and constrain an LLM agent so it outputs well-formed Jira stories — user role, goal, benefit, description, and tight acceptance criteria every time.",
+    "tags": ["ai", "agents", "llm", "jira", "product"],
+    "path": "/posts/2026-06-21-llm-agent-jira-stories.txt"
+  },
+  {
     "slug": "2026-06-21-agent-skills-memory-rules",
     "title": "Building Agent Skills, Memory, and Rules",
     "date": "2026-06-21",

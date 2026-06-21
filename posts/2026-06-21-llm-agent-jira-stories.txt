@@ -1,0 +1,273 @@
+---
+title: "Using an LLM Agent to Write Good Jira Stories"
+date: "2026-06-21"
+tags: [ai, agents, llm, jira, product]
+excerpt: "How to prompt and constrain an LLM agent so it outputs well-formed Jira stories — user role, goal, benefit, description, and tight acceptance criteria every time."
+---
+
+# Using an LLM Agent to Write Good Jira Stories
+
+Most LLM-generated Jira stories are vague, overlong, or missing the acceptance criteria that actually let engineers know when they're done. The problem isn't the model — it's that the task has no enforced structure. This post covers how to build a small agent that outputs properly formed stories every time: user role, goal, benefit, description, and a concrete AC checklist.
+
+## What a good story looks like
+
+Before writing any prompts, agree on the template. A good Jira story has four parts:
+
+**Title** — one line, action-oriented, under 80 characters.
+
+**User story** — the classic format:
+> As a **[role]**, I want **[goal]** so that **[benefit]**.
+
+The role names a real actor (not "user" — be specific: "authenticated admin", "first-time visitor", "CI pipeline"). The goal describes what they want to do, not how. The benefit explains why it matters to that actor.
+
+**Description** — context the engineer needs that doesn't fit in the one-liner. Background, constraints, relevant edge cases, links to designs or prior tickets. Keep it under 200 words.
+
+**Acceptance criteria** — a numbered checklist of verifiable conditions. Each item should be falsifiable: a tester or the engineer themselves can check it off without ambiguity.
+
+A bad AC:
+> - The page loads correctly.
+
+A good AC:
+> - The dashboard loads within 2 seconds on a 10 Mbps connection.
+> - An error banner appears if the API returns 4xx or 5xx.
+> - The user can dismiss the error banner by clicking ✕.
+
+## The system prompt
+
+The system prompt is the most important lever. It defines the output format and enforces the conventions before the model sees any user input.
+
+```
+You are a product analyst who writes Jira user stories.
+
+Always output stories in this exact format — no deviations:
+
+## [Title]
+
+**User story**
+As a [role], I want [goal] so that [benefit].
+
+**Description**
+[2–5 sentences of context, constraints, or background. No bullet points here.]
+
+**Acceptance criteria**
+1. [Verifiable condition]
+2. [Verifiable condition]
+3. [Verifiable condition]
+...
+
+Rules:
+- The role must be a specific actor, never "user" or "person".
+- The goal must describe an action or outcome, not a feature name.
+- The benefit must explain value to the actor, not to the business.
+- Each acceptance criterion must be independently verifiable.
+- Never include implementation details in the user story line.
+- Never use passive voice in the acceptance criteria.
+- Output only the story — no preamble, no sign-off, no commentary.
+```
+
+The last rule — "output only the story" — is critical. Without it, models pad their responses with "Great! Here is your story:" which breaks any downstream parsing.
+
+## The agent loop
+
+Wrap the system prompt in a simple agent that takes a rough feature description and outputs a formatted story. Add a validation step so the agent retries if the output is malformed.
+
+```python
+import re
+from anthropic import Anthropic
+
+client = Anthropic()
+
+SYSTEM = """
+You are a product analyst who writes Jira user stories.
+
+Always output stories in this exact format — no deviations:
+
+## [Title]
+
+**User story**
+As a [role], I want [goal] so that [benefit].
+
+**Description**
+[2–5 sentences of context, constraints, or background.]
+
+**Acceptance criteria**
+1. [Verifiable condition]
+2. [Verifiable condition]
+...
+
+Rules:
+- The role must be a specific actor, never "user" or "person".
+- The goal must describe an action or outcome, not a feature name.
+- The benefit must explain value to the actor, not to the business.
+- Each AC item must be independently verifiable.
+- Never include implementation details in the user story line.
+- Output only the story — no preamble, no sign-off.
+""".strip()
+
+def validate_story(text: str) -> list[str]:
+    errors = []
+    if not re.search(r'^## .+', text, re.MULTILINE):
+        errors.append("Missing title (## heading)")
+    if not re.search(r'As a .+, I want .+ so that .+', text):
+        errors.append("Missing or malformed user story line")
+    if "As a user," in text:
+        errors.append("Role is too generic ('user') — must be a specific actor")
+    if "**Description**" not in text:
+        errors.append("Missing Description section")
+    if "**Acceptance criteria**" not in text:
+        errors.append("Missing Acceptance criteria section")
+    ac_items = re.findall(r'^\d+\. .+', text, re.MULTILINE)
+    if len(ac_items) < 2:
+        errors.append("Fewer than 2 acceptance criteria items")
+    return errors
+
+def write_story(feature_description: str, max_retries: int = 3) -> str:
+    messages = [{"role": "user", "content": feature_description}]
+
+    for attempt in range(max_retries):
+        response = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=1024,
+            system=SYSTEM,
+            messages=messages,
+        )
+        story = response.content[0].text.strip()
+        errors = validate_story(story)
+
+        if not errors:
+            return story
+
+        # Feed errors back so the model can self-correct
+        messages.append({"role": "assistant", "content": story})
+        messages.append({
+            "role": "user",
+            "content": f"The story has these issues — fix them and output only the corrected story:\n"
+                       + "\n".join(f"- {e}" for e in errors),
+        })
+
+    raise ValueError(f"Story still invalid after {max_retries} attempts:\n{story}")
+```
+
+The retry loop feeds the validation errors back to the model as a user message. Models self-correct reliably on structural errors when you name the exact problem — much more reliably than hoping the first output is right.
+
+## Structuring the input
+
+The quality of the output depends heavily on how much context you give in the input. A one-line description produces generic stories. A structured brief produces tight ones.
+
+Encourage whoever is using the agent (or build a short intake form) to provide:
+
+```
+Feature: [what it does]
+Who uses it: [which type of user, their context]
+Why they need it: [the underlying problem or job to be done]
+Constraints: [technical limits, regulatory requirements, non-goals]
+Done means: [a rough sense of what "shipped" looks like]
+```
+
+A filled-in brief for an example feature:
+
+```
+Feature: Bulk CSV export of audit logs
+Who uses it: Compliance officers reviewing access events for quarterly audits
+Why they need it: Currently they copy-paste rows manually — takes hours, error-prone
+Constraints: Export must be limited to the user's own tenant; PII must be masked by default; files larger than 50k rows should be paginated
+Done means: Compliance officer can download a CSV from the audit log page filtered by date range
+```
+
+Feed that brief directly to `write_story()` and you get a story with the right actor ("compliance officer"), a meaningful benefit ("complete quarterly audits without manual data entry"), and AC items you can actually test.
+
+## Generating multiple stories from an epic
+
+For an epic, run the agent once per story rather than asking for all stories in one call. Batching produces worse output — the model compresses the later stories to fit.
+
+```python
+def epic_to_stories(epic_description: str) -> list[str]:
+    # First pass: decompose the epic into individual feature briefs
+    decompose_response = client.messages.create(
+        model="claude-sonnet-4-6",
+        max_tokens=1024,
+        system="You are a product analyst. Given an epic description, output a numbered list of individual feature briefs. Each brief should be 2–4 sentences. Output only the list.",
+        messages=[{"role": "user", "content": epic_description}],
+    )
+    briefs_text = decompose_response.content[0].text.strip()
+    briefs = re.split(r'^\d+\.\s+', briefs_text, flags=re.MULTILINE)[1:]
+
+    # Second pass: one story per brief
+    return [write_story(brief.strip()) for brief in briefs]
+```
+
+The two-pass approach — decompose then write — produces much better stories than asking for a full set in one shot.
+
+## Acceptance criteria anti-patterns to catch
+
+Build these checks into your `validate_story` function or prompt rules:
+
+**Passive voice** — "The button should be visible" is weaker than "The button is visible". Passive ACs are harder to test because it's unclear who or what is doing the action.
+
+**Subjective language** — "The page loads quickly" is untestable. "The page loads in under 1.5 seconds" is not.
+
+**Implementation smuggled in** — "The API returns a 200 status" is an implementation detail, not a user-visible condition. Reframe as "The user sees a success message and their data is updated."
+
+**Compound criteria** — "The user can filter by date and export results" is two criteria. Split them: testers need to be able to check each independently.
+
+Add a check for each:
+
+```python
+SUBJECTIVE_WORDS = ["quickly", "fast", "slow", "easy", "simple", "good", "nice"]
+
+def check_ac_quality(story: str) -> list[str]:
+    warnings = []
+    ac_section = story.split("**Acceptance criteria**")[-1]
+    for word in SUBJECTIVE_WORDS:
+        if word in ac_section.lower():
+            warnings.append(f"Subjective word '{word}' found in AC — add a measurable threshold")
+    if re.search(r'\b(API|endpoint|database|SQL|HTTP)\b', ac_section):
+        warnings.append("Possible implementation detail in AC — rephrase as user-visible behaviour")
+    return warnings
+```
+
+Return these as warnings rather than hard errors — sometimes an implementation detail is genuinely the right thing to specify.
+
+## Putting it together
+
+A minimal end-to-end call:
+
+```python
+brief = """
+Feature: Password expiry notification emails
+Who uses it: End users with accounts older than 90 days
+Why they need it: Users currently get locked out without warning; support tickets spike every quarter
+Constraints: Email must be sent 14 days and 3 days before expiry; users can opt out; must comply with CAN-SPAM
+Done means: Users receive timely emails and can update their password before being locked out
+"""
+
+story = write_story(brief)
+print(story)
+```
+
+Output:
+
+```
+## Password Expiry Email Notifications
+
+**User story**
+As an authenticated user with an expiring password, I want to receive email reminders
+before my password expires so that I can update it before being locked out of my account.
+
+**Description**
+Users with passwords older than 90 days currently receive no warning before expiry,
+leading to support escalations each quarter. This feature sends automated reminder emails
+at 14 days and 3 days before the expiry date. Users who have opted out of marketing email
+must still receive security-critical notices; a separate opt-out preference is required.
+All emails must include a working unsubscribe link per CAN-SPAM requirements.
+
+**Acceptance criteria**
+1. A reminder email is sent exactly 14 days before the user's password expiry date.
+2. A second reminder email is sent exactly 3 days before expiry.
+3. Each email includes a direct link to the change-password page.
+4. Users can opt out of reminder emails via an unsubscribe link in the email footer.
+5. Opted-out users do not receive subsequent reminders but are not blocked from receiving other security notices.
+6. No email is sent if the user updates their password before the scheduled send time.
+```
+
+That's a story an engineer can implement and a tester can verify without a follow-up meeting. The model gets there reliably when the system prompt enforces structure, the input brief includes actor and constraint context, and a validation loop catches the common failure modes before the story reaches your backlog.
