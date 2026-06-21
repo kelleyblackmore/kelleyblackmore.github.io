@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Loading… | Kelley Blackmore</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            rust: {
+              300: '#f4a07a',
+              400: '#e07040',
+              500: '#c85a28',
+              600: '#a84820',
+            },
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    .prose h1 { font-size: 2rem; font-weight: 700; color: #fff; margin: 0 0 1rem; line-height: 1.25; }
+    .prose h2 { font-size: 1.35rem; font-weight: 600; color: #f3f4f6; margin: 2.25rem 0 0.75rem; border-bottom: 1px solid #1f2937; padding-bottom: 0.4rem; }
+    .prose h3 { font-size: 1.1rem; font-weight: 600; color: #e5e7eb; margin: 1.75rem 0 0.5rem; }
+    .prose p  { color: #9ca3af; line-height: 1.8; margin-bottom: 1rem; }
+    .prose a  { color: #e07040; text-decoration: underline; text-underline-offset: 2px; }
+    .prose a:hover { color: #f4a07a; }
+    .prose ul { list-style-type: disc;     padding-left: 1.5rem; color: #9ca3af; margin-bottom: 1rem; }
+    .prose ol { list-style-type: decimal;  padding-left: 1.5rem; color: #9ca3af; margin-bottom: 1rem; }
+    .prose li { margin-bottom: 0.3rem; line-height: 1.7; }
+    .prose code { font-family: 'JetBrains Mono', monospace; font-size: 0.83em; background: #1f2937; color: #f4a07a; padding: 0.15em 0.4em; border-radius: 0.25rem; }
+    .prose pre  { background: #0d1117; border: 1px solid #1f2937; border-radius: 0.75rem; overflow-x: auto; margin-bottom: 1.5rem; padding: 1.25rem; }
+    .prose pre code { background: transparent; color: inherit; padding: 0; font-size: 0.875rem; }
+    .prose strong { color: #f3f4f6; font-weight: 600; }
+    .prose blockquote { border-left: 3px solid #c85a28; padding-left: 1rem; color: #6b7280; font-style: italic; margin-bottom: 1rem; }
+    .prose hr { border-color: #1f2937; margin: 2rem 0; }
+    .prose table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 0.9rem; }
+    .prose th { background: #1f2937; color: #f3f4f6; padding: 0.5rem 0.75rem; text-align: left; border: 1px solid #374151; }
+    .prose td { color: #9ca3af; padding: 0.5rem 0.75rem; border: 1px solid #1f2937; }
+    .prose tr:nth-child(even) td { background: #111827; }
+  </style>
+</head>
+<body class="bg-gray-950 text-gray-100 font-sans antialiased">
+
+  <!-- Nav -->
+  <nav class="fixed inset-x-0 top-0 z-50 border-b border-gray-800/60 bg-gray-950/80 backdrop-blur-md">
+    <div class="mx-auto flex h-14 max-w-3xl items-center justify-between px-6">
+      <a href="/" class="font-mono text-sm font-medium text-rust-400 hover:text-rust-300 transition-colors">kb</a>
+      <div class="flex gap-6 text-sm text-gray-400">
+        <a href="/#projects" class="hover:text-white transition-colors">Projects</a>
+        <a href="/#writing"  class="hover:text-white transition-colors">Writing</a>
+        <a href="https://github.com/kelleyblackmore" target="_blank" rel="noopener" class="hover:text-white transition-colors">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="mx-auto max-w-3xl px-6 pt-24 pb-24">
+
+    <a href="/#writing" class="mb-10 inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-300 transition-colors">
+      <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      All posts
+    </a>
+
+    <!-- Loading -->
+    <div id="state-loading" class="flex items-center gap-3 text-gray-600 mt-6">
+      <svg class="h-5 w-5 animate-spin" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10"/></svg>
+      Loading…
+    </div>
+
+    <!-- Error -->
+    <div id="state-error" class="hidden text-center py-16">
+      <p class="text-gray-500 text-lg mb-2">Post not found</p>
+      <a href="/" class="text-rust-400 hover:text-rust-300 transition-colors text-sm">← Back home</a>
+    </div>
+
+    <!-- Post content -->
+    <div id="state-post" class="hidden">
+      <div class="mb-8 flex flex-wrap items-center gap-3 text-sm text-gray-500">
+        <time id="post-date" class="font-mono"></time>
+        <div id="post-tags" class="flex flex-wrap gap-2"></div>
+      </div>
+      <article id="post-body" class="prose"></article>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-800 bg-gray-950">
+    <div class="mx-auto flex max-w-3xl items-center justify-between px-6 py-8 text-sm text-gray-500">
+      <span class="font-mono">Kelley Blackmore</span>
+      <div class="flex gap-5">
+        <a href="https://github.com/kelleyblackmore" target="_blank" rel="noopener" class="hover:text-gray-300 transition-colors">GitHub</a>
+        <a href="mailto:kelleyblackmore@gmail.com" class="hover:text-gray-300 transition-colors">Email</a>
+        <a href="/rss.xml" class="hover:text-gray-300 transition-colors">RSS</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const slug   = params.get('slug');
+
+    function show(id) {
+      ['state-loading','state-error','state-post'].forEach(s =>
+        document.getElementById(s).classList.toggle('hidden', s !== id)
+      );
+    }
+
+    if (!slug) { show('state-error'); }
+    else {
+      fetch(`/posts/${slug}.md`)
+        .then(r => { if (!r.ok) throw new Error('not found'); return r.text(); })
+        .then(raw => {
+          // Parse YAML front matter
+          const fm = {};
+          let body = raw;
+          if (raw.startsWith('---')) {
+            const end = raw.indexOf('\n---', 3);
+            if (end !== -1) {
+              raw.slice(3, end).trim().split('\n').forEach(line => {
+                const colon = line.indexOf(':');
+                if (colon === -1) return;
+                const key = line.slice(0, colon).trim();
+                let val   = line.slice(colon + 1).trim();
+                if (val.startsWith('[') && val.endsWith(']')) {
+                  val = val.slice(1, -1).split(',').map(s => s.trim().replace(/^['"]|['"]$/g, ''));
+                } else {
+                  val = val.replace(/^['"]|['"]$/g, '');
+                }
+                fm[key] = val;
+              });
+              body = raw.slice(end + 4).trim();
+            }
+          }
+
+          document.title = `${fm.title || slug} | Kelley Blackmore`;
+
+          if (fm.date) document.getElementById('post-date').textContent = fm.date;
+          if (fm.tags) {
+            const tags = Array.isArray(fm.tags) ? fm.tags : [fm.tags];
+            document.getElementById('post-tags').innerHTML = tags
+              .map(t => `<span class="rounded-full bg-gray-800 px-2.5 py-0.5 font-mono text-xs text-gray-400">${t}</span>`)
+              .join('');
+          }
+
+          // Configure marked with highlight.js
+          marked.use({
+            highlight(code, lang) {
+              if (lang && hljs.getLanguage(lang)) {
+                return hljs.highlight(code, { language: lang }).value;
+              }
+              return hljs.highlightAuto(code).value;
+            },
+            breaks: false,
+            gfm: true,
+          });
+
+          document.getElementById('post-body').innerHTML = marked.parse(body);
+          document.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+          show('state-post');
+        })
+        .catch(() => show('state-error'));
+    }
+  </script>
+</body>
+</html>

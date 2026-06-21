@@ -46,11 +46,10 @@
       from { opacity: 0; transform: translateY(14px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-    .fade-up   { animation: fade-up 0.55s ease both; }
-    .delay-1   { animation-delay: 0.1s; }
-    .delay-2   { animation-delay: 0.22s; }
-    .delay-3   { animation-delay: 0.34s; }
-    /* Language colour dots */
+    .fade-up  { animation: fade-up 0.55s ease both; }
+    .delay-1  { animation-delay: 0.1s; }
+    .delay-2  { animation-delay: 0.22s; }
+    .delay-3  { animation-delay: 0.34s; }
     .dot-rust       { background: #dea584; }
     .dot-shell      { background: #89e051; }
     .dot-python     { background: #3572a5; }
@@ -65,7 +64,8 @@
     <div class="mx-auto flex h-14 max-w-5xl items-center justify-between px-6">
       <a href="#home" class="font-mono text-sm font-medium text-rust-400 hover:text-rust-300 transition-colors">kb</a>
       <div class="flex gap-6 text-sm text-gray-400">
-        <a href="#projects" class="hover:text-white transition-colors">Projects</a>
+        <a href="#work"     class="hover:text-white transition-colors">Work</a>
+        <a href="#projects" class="hover:text-white transition-colors">Open Source</a>
         <a href="#writing"  class="hover:text-white transition-colors">Writing</a>
         <a href="https://github.com/kelleyblackmore" target="_blank" rel="noopener" class="hover:text-white transition-colors">GitHub</a>
       </div>
@@ -87,7 +87,6 @@
       <div class="fade-up delay-3 flex flex-wrap gap-3">
         <a href="https://github.com/kelleyblackmore" target="_blank" rel="noopener"
            class="inline-flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-sm font-medium hover:bg-gray-700 hover:border-gray-600 transition-colors">
-          <!-- GitHub icon -->
           <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
           GitHub
         </a>
@@ -100,20 +99,65 @@
     </div>
   </section>
 
-  <!-- ── Projects ──────────────────────────────────────────────────────── -->
-  <section id="projects" class="mx-auto max-w-5xl px-6 py-20">
+  <!-- ── Selected Work (private) ───────────────────────────────────────── -->
+  <section id="work" class="mx-auto max-w-5xl px-6 pt-20 pb-6">
     <div class="mb-10 flex items-center gap-4">
-      <h2 class="text-2xl font-bold text-white">Projects</h2>
+      <h2 class="text-2xl font-bold text-white">Selected Work</h2>
       <div class="h-px flex-1 bg-gray-800"></div>
     </div>
 
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 
-      <!-- FEATURED ─ Automatic-Secret-Rotation (spans 2 cols) -->
+      <!-- QuizPort — featured wide -->
+      <a href="https://www.quizport.io/" target="_blank" rel="noopener"
+         class="card group relative overflow-hidden rounded-xl border border-gray-800 bg-gray-900 p-5 sm:col-span-2">
+        <!-- Private badge -->
+        <div class="absolute right-4 top-4 flex items-center gap-1.5 rounded-full border border-gray-700 bg-gray-800 px-2.5 py-0.5 font-mono text-xs text-gray-400">
+          <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          private
+        </div>
+        <div class="mb-4 flex items-start gap-3">
+          <div class="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-violet-500/25 bg-violet-500/10">
+            <svg class="h-4 w-4 text-violet-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+          </div>
+          <div>
+            <h3 class="font-semibold text-white transition-colors group-hover:text-rust-400">QuizPort</h3>
+            <p class="mt-1 text-sm leading-relaxed text-gray-400">
+              Full-stack interactive quiz platform. Supports real-time multiplayer sessions, custom question banks, scoring, and leaderboards — deployed and live at quizport.io.
+            </p>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <span class="rounded-full bg-gray-800 px-2.5 py-0.5 font-mono text-xs text-gray-400">full-stack</span>
+          <span class="rounded-full bg-gray-800 px-2.5 py-0.5 font-mono text-xs text-gray-400">real-time</span>
+          <span class="rounded-full bg-gray-800 px-2.5 py-0.5 font-mono text-xs text-rust-400 border border-rust-500/30">live ↗</span>
+        </div>
+      </a>
+
+      <!-- Placeholder slot — keeps grid balanced, hints at more work -->
+      <div class="flex min-h-[140px] items-center justify-center rounded-xl border border-dashed border-gray-800 bg-gray-900/30 p-5 text-center">
+        <div>
+          <p class="text-sm font-medium text-gray-600">More available on request</p>
+          <a href="mailto:kelleyblackmore@gmail.com" class="mt-1 block font-mono text-xs text-gray-700 hover:text-gray-500 transition-colors">kelleyblackmore@gmail.com</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Open Source ───────────────────────────────────────────────────── -->
+  <section id="projects" class="mx-auto max-w-5xl px-6 py-12">
+    <div class="mb-10 flex items-center gap-4">
+      <h2 class="text-2xl font-bold text-white">Open Source</h2>
+      <div class="h-px flex-1 bg-gray-800"></div>
+    </div>
+
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
+      <!-- FEATURED ─ Automatic-Secret-Rotation -->
       <a href="https://github.com/kelleyblackmore/Automatic-Secret-Rotation"
          target="_blank" rel="noopener"
          class="card group relative overflow-hidden rounded-xl border border-gray-800 bg-gray-900 p-5 sm:col-span-2">
-        <!-- Star badge -->
         <div class="absolute right-4 top-4 flex items-center gap-1 font-mono text-xs text-yellow-400">
           <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
           3
@@ -338,7 +382,7 @@
 
     <div class="space-y-3">
 
-      <a href="/posts/2026-06-21-agent-skills-memory-rules.md"
+      <a href="/post.html?slug=2026-06-21-agent-skills-memory-rules"
          class="card group flex items-start justify-between gap-4 rounded-xl border border-gray-800 bg-gray-900 p-5">
         <div class="min-w-0">
           <h3 class="font-semibold text-white transition-colors group-hover:text-rust-400">Building Agent Skills, Memory, and Rules</h3>
@@ -352,7 +396,7 @@
         <time class="flex-shrink-0 font-mono text-xs text-gray-500 mt-1">2026-06-21</time>
       </a>
 
-      <a href="/posts/2026-06-21-benchmarking-llms.md"
+      <a href="/post.html?slug=2026-06-21-benchmarking-llms"
          class="card group flex items-start justify-between gap-4 rounded-xl border border-gray-800 bg-gray-900 p-5">
         <div class="min-w-0">
           <h3 class="font-semibold text-white transition-colors group-hover:text-rust-400">Benchmarking LLMs: What to Measure and How</h3>
@@ -366,7 +410,7 @@
         <time class="flex-shrink-0 font-mono text-xs text-gray-500 mt-1">2026-06-21</time>
       </a>
 
-      <a href="/posts/2026-06-21-vault-secret-topology.md"
+      <a href="/post.html?slug=2026-06-21-vault-secret-topology"
          class="card group flex items-start justify-between gap-4 rounded-xl border border-gray-800 bg-gray-900 p-5">
         <div class="min-w-0">
           <h3 class="font-semibold text-white transition-colors group-hover:text-rust-400">Secret Topology in HashiCorp Vault</h3>
@@ -380,7 +424,7 @@
         <time class="flex-shrink-0 font-mono text-xs text-gray-500 mt-1">2026-06-21</time>
       </a>
 
-      <a href="/posts/2025-12-25-getting-started-with-rust.md"
+      <a href="/post.html?slug=2025-12-25-getting-started-with-rust"
          class="card group flex items-start justify-between gap-4 rounded-xl border border-gray-800 bg-gray-900 p-5">
         <div class="min-w-0">
           <h3 class="font-semibold text-white transition-colors group-hover:text-rust-400">Getting started with Rust</h3>
@@ -393,17 +437,18 @@
         <time class="flex-shrink-0 font-mono text-xs text-gray-500 mt-1">2025-12-25</time>
       </a>
 
-      <a href="/posts/2025-12-25-deploying-with-github-pages.md"
+      <a href="/post.html?slug=2025-12-25-deploying-with-github-pages"
          class="card group flex items-start justify-between gap-4 rounded-xl border border-gray-800 bg-gray-900 p-5">
         <div class="min-w-0">
-          <h3 class="font-semibold text-white transition-colors group-hover:text-rust-400">Deploying with GitHub Pages</h3>
-          <p class="mt-1 text-sm text-gray-400">How I deploy this portfolio using GitHub Pages and <code class="rounded bg-gray-800 px-1 font-mono text-xs">gh-pages</code>.</p>
+          <h3 class="font-semibold text-white transition-colors group-hover:text-rust-400">Deploying a Static Site to GitHub Pages</h3>
+          <p class="mt-1 text-sm text-gray-400">A complete guide to deploying and maintaining a static site on GitHub Pages — custom domains, Jekyll pitfalls, and keeping it fast.</p>
           <div class="mt-3 flex gap-2">
             <span class="rounded-full bg-gray-800 px-2.5 py-0.5 font-mono text-xs text-gray-400">deploy</span>
             <span class="rounded-full bg-gray-800 px-2.5 py-0.5 font-mono text-xs text-gray-400">github-pages</span>
+            <span class="rounded-full bg-gray-800 px-2.5 py-0.5 font-mono text-xs text-gray-400">devops</span>
           </div>
         </div>
-        <time class="flex-shrink-0 font-mono text-xs text-gray-500 mt-1">2025-12-25</time>
+        <time class="flex-shrink-0 font-mono text-xs text-gray-500 mt-1">2026-06-21</time>
       </a>
 
     </div>
