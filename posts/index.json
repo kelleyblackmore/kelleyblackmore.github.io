@@ -1,5 +1,13 @@
 [
   {
+    "slug": "2026-06-21-rust-dependencies-sbom",
+    "title": "Managing Rust Dependencies and Tracking SBOMs",
+    "date": "2026-06-21",
+    "excerpt": "How to keep your Cargo dependency tree clean, audit it for known vulnerabilities, and generate a Software Bill of Materials you can actually use.",
+    "tags": ["rust", "sbom", "security", "supply-chain", "cargo"],
+    "path": "/posts/2026-06-21-rust-dependencies-sbom.txt"
+  },
+  {
     "slug": "2026-06-21-llm-agent-jira-stories",
     "title": "Using an LLM Agent to Write Good Jira Stories",
     "date": "2026-06-21",
@@ -41,10 +49,10 @@
   },
   {
     "slug": "2025-12-25-getting-started-with-rust",
-    "title": "Getting started with Rust",
-    "date": "2025-12-25",
-    "excerpt": "A short guide to get started with Rust and why I like it for systems work.",
-    "tags": ["rust", "tutorial"],
+    "title": "Getting Started with Rust",
+    "date": "2026-06-21",
+    "excerpt": "A practical introduction to Rust — ownership, the borrow checker, cargo, and the patterns that make it click for systems work.",
+    "tags": ["rust", "tutorial", "systems"],
     "path": "/posts/2025-12-25-getting-started-with-rust.txt"
   }
 ]

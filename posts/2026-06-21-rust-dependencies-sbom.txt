@@ -1,0 +1,286 @@
+---
+title: "Managing Rust Dependencies and Tracking SBOMs"
+date: "2026-06-21"
+tags: [rust, sbom, security, supply-chain, cargo]
+excerpt: "How to keep your Cargo dependency tree clean, audit it for known vulnerabilities, and generate a Software Bill of Materials you can actually use."
+---
+
+# Managing Rust Dependencies and Tracking SBOMs
+
+Rust's package manager Cargo makes pulling in dependencies easy. Too easy, sometimes — a single `cargo add` can add dozens of transitive crates to your build. This post covers the tools and practices that keep your dependency tree auditable: locking versions correctly, auditing for known vulnerabilities, pruning what you don't need, and generating an SBOM that satisfies compliance requirements.
+
+## The lock file is your source of truth
+
+`Cargo.toml` declares your intent. `Cargo.lock` records what was actually built. For binaries and applications, commit the lock file. For libraries, don't — library consumers need to resolve their own dependency graph.
+
+```
+# binary / application — commit this
+Cargo.lock
+
+# library crate — add to .gitignore
+Cargo.lock
+```
+
+If you're distributing a binary or running something in production, `Cargo.lock` is what reproducible builds are built on. Regenerating it without review is how supply-chain surprises happen.
+
+Verify a build is reproducible:
+
+```bash
+cargo build --locked   # fails if Cargo.lock is out of date
+```
+
+Run this in CI. If it fails, someone added a dependency locally without committing the updated lock file.
+
+## Dependency hygiene with cargo tree
+
+`cargo tree` is built in and indispensable. Use it to understand what you're actually shipping:
+
+```bash
+# full tree
+cargo tree
+
+# find all versions of a crate (version conflicts are common)
+cargo tree -d
+
+# show reverse dependencies — what pulls in a specific crate
+cargo tree -i openssl
+
+# show only the dependency chain to a specific crate
+cargo tree -p my-crate --edges no-dev
+```
+
+Multiple versions of the same crate in your tree are a yellow flag. They inflate binary size and can cause subtle incompatibilities. Resolve them with `cargo update -p <crate> --precise <version>` once you've checked the changelog.
+
+## Auditing with cargo-audit
+
+`cargo-audit` checks your `Cargo.lock` against the RustSec advisory database. Install it once, run it often:
+
+```bash
+cargo install cargo-audit
+
+# basic audit
+cargo audit
+
+# fail on warnings too (good for CI)
+cargo audit --deny warnings
+
+# audit a specific lock file
+cargo audit --file path/to/Cargo.lock
+```
+
+Sample output when a vulnerability is found:
+
+```
+error[RUSTSEC-2023-0044]: `rustls` vulnerable to timing side-channel
+  --> Cargo.lock:312:1
+   |
+312| rustls 0.20.8
+   |
+   = ID: RUSTSEC-2023-0044
+   = Description: A timing side channel in the RSA key exchange...
+   = Solution: Upgrade to >= 0.21.1
+```
+
+Add it to your CI pipeline:
+
+```yaml
+# .github/workflows/audit.yml
+name: Security audit
+on:
+  push:
+    paths: ['Cargo.lock']
+  schedule:
+    - cron: '0 8 * * 1'   # every Monday morning
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: rustsec/audit-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+```
+
+The scheduled run is important — new advisories drop against old crates all the time. Auditing only on push means you won't know until the next code change.
+
+## Denying new dependencies with cargo-deny
+
+`cargo-audit` checks for known vulnerabilities. `cargo-deny` goes further: it enforces policies on licenses, bans specific crates, and blocks duplicate versions.
+
+```bash
+cargo install cargo-deny
+cargo deny init   # generates deny.toml
+```
+
+A useful `deny.toml`:
+
+```toml
+[advisories]
+db-path = "~/.cargo/advisory-db"
+db-urls = ["https://github.com/rustsec/advisory-db"]
+vulnerability = "deny"
+unmaintained = "warn"
+yanked = "deny"
+notice = "warn"
+
+[licenses]
+allow = [
+  "MIT",
+  "Apache-2.0",
+  "Apache-2.0 WITH LLVM-exception",
+  "BSD-2-Clause",
+  "BSD-3-Clause",
+  "ISC",
+  "Unicode-DFS-2016",
+]
+deny = ["GPL-2.0", "AGPL-3.0"]
+copyleft = "warn"
+
+[bans]
+multiple-versions = "warn"
+deny = [
+  # ban openssl in favour of rustls
+  { name = "openssl" },
+]
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+```
+
+The `[sources]` section is particularly useful for supply-chain hygiene — it blocks crates pulled from unknown git repositories, which is a common vector for dependency confusion attacks.
+
+Run it in CI:
+
+```bash
+cargo deny check
+```
+
+## Generating an SBOM
+
+An SBOM (Software Bill of Materials) is a machine-readable inventory of everything your software depends on. It's increasingly required by federal contracts (per EO 14028), enterprise procurement, and security-conscious customers.
+
+### With cargo-sbom
+
+```bash
+cargo install cargo-sbom
+
+# CycloneDX format (most widely supported)
+cargo sbom --output-format cyclone_dx_json_1_4 > sbom.cdx.json
+
+# SPDX format (required by some government contracts)
+cargo sbom --output-format spdx_json_2_3 > sbom.spdx.json
+```
+
+### With syft (broader ecosystem support)
+
+Syft from Anchore supports Rust projects and integrates well with container scanning:
+
+```bash
+# install syft
+curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+
+# generate SBOM for a Rust project directory
+syft dir:. -o cyclonedx-json > sbom.cdx.json
+
+# generate SBOM for a container image that contains your binary
+syft my-image:latest -o spdx-json > sbom.spdx.json
+```
+
+### Attaching the SBOM to a GitHub release
+
+```yaml
+# .github/workflows/release.yml
+- name: Generate SBOM
+  run: |
+    cargo install cargo-sbom
+    cargo sbom --output-format cyclone_dx_json_1_4 > sbom.cdx.json
+
+- name: Upload SBOM to release
+  uses: softprops/action-gh-release@v1
+  with:
+    files: sbom.cdx.json
+```
+
+Now every release has a downloadable SBOM that auditors and customers can verify.
+
+## Signing and attesting the SBOM
+
+Generating an SBOM is step one. Signing it makes it verifiable — consumers can confirm the SBOM came from your pipeline and hasn't been tampered with. Use `cosign` for this:
+
+```bash
+# install cosign
+brew install sigstore/tap/cosign   # or from GitHub releases
+
+# sign the SBOM with a keyless signature (OIDC-based, no key management)
+cosign sign-blob sbom.cdx.json \
+  --bundle sbom.cdx.json.bundle \
+  --yes
+
+# verify later
+cosign verify-blob sbom.cdx.json \
+  --bundle sbom.cdx.json.bundle \
+  --certificate-identity="https://github.com/yourorg/yourrepo/.github/workflows/release.yml@refs/heads/main" \
+  --certificate-oidc-issuer="https://token.actions.githubusercontent.com"
+```
+
+Keyless signing works in GitHub Actions without any secrets — it uses the workflow's OIDC token as the identity. This ties the SBOM signature to the specific workflow that generated it.
+
+## Keeping dependencies minimal
+
+The most secure dependency is the one you don't have. Before adding a crate, ask:
+
+- Is this already available as a feature flag on a crate you already use?
+- Can you implement the needed 20 lines yourself rather than pull in a 15-crate graph?
+- Is the crate actively maintained? Check the last commit date and the number of open issues.
+
+For crates you do use, disable default features and opt in only to what you need:
+
+```toml
+# Cargo.toml
+[dependencies]
+tokio = { version = "1", default-features = false, features = ["rt", "net"] }
+reqwest = { version = "0.11", default-features = false, features = ["rustls-tls", "json"] }
+```
+
+`default-features = false` on `reqwest` alone removes the `openssl` dependency, which eliminates a whole class of native build problems and reduces your attack surface.
+
+## Putting it all together: a minimal CI checklist
+
+```yaml
+# .github/workflows/supply-chain.yml
+name: Supply chain
+on: [push, pull_request]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools
+        run: |
+          cargo install cargo-audit cargo-deny cargo-sbom
+
+      - name: Build (locked)
+        run: cargo build --locked --release
+
+      - name: Audit vulnerabilities
+        run: cargo audit
+
+      - name: Check licenses and bans
+        run: cargo deny check
+
+      - name: Generate SBOM
+        run: cargo sbom --output-format cyclone_dx_json_1_4 > sbom.cdx.json
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.cdx.json
+```
+
+This pipeline fails the build on known vulnerabilities, enforces license and source policies, and produces an SBOM on every push. It's the floor — not the ceiling — of Rust supply-chain hygiene.

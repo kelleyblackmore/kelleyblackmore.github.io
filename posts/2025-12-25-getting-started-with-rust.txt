@@ -1,16 +1,310 @@
 ---
-title: "Getting started with Rust"
-date: "2025-12-25"
-tags: [rust, tutorial]
-excerpt: "A short guide to get started with Rust and why I like it for systems work."
+title: "Getting Started with Rust"
+date: "2026-06-21"
+tags: [rust, tutorial, systems]
+excerpt: "A practical introduction to Rust — ownership, the borrow checker, cargo, and the patterns that make it click for systems work."
 ---
 
-# Getting started with Rust
+# Getting Started with Rust
 
-Rust is a great language for systems programming. In this post I'll cover installing Rust, creating a new project, and explaining ownership at a high level.
+Rust has a reputation for a steep learning curve, mostly because of the borrow checker. That reputation is half true. The borrow checker is unfamiliar, but it's also the reason Rust programs don't crash in production the way C and C++ programs do. This guide gets you through the first friction and into the parts of the language that make it genuinely enjoyable for systems work.
 
-- Install with `rustup`
-- Create a new project with `cargo new myapp`
-- Build and run with `cargo run`
+## Install the toolchain
 
-More to come in follow-up posts.
+Use `rustup` — don't install Rust from a package manager. `rustup` manages multiple toolchain versions and is the standard across the ecosystem:
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+
+After installation, `rustup`, `rustc`, and `cargo` are all on your PATH. Verify with:
+
+```bash
+rustc --version
+cargo --version
+```
+
+To update later:
+
+```bash
+rustup update
+```
+
+## Your first project
+
+Cargo is Rust's build system and package manager. Create a new binary project:
+
+```bash
+cargo new hello-world
+cd hello-world
+```
+
+The project structure:
+
+```
+hello-world/
+├── Cargo.toml      # project metadata and dependencies
+└── src/
+    └── main.rs     # entry point
+```
+
+`src/main.rs` starts with:
+
+```rust
+fn main() {
+    println!("Hello, world!");
+}
+```
+
+Build and run:
+
+```bash
+cargo run
+```
+
+For a release-optimised binary:
+
+```bash
+cargo build --release
+# binary is at ./target/release/hello-world
+```
+
+## Ownership — the central idea
+
+Rust's memory model has one rule: every value has exactly one owner. When the owner goes out of scope, the value is dropped (freed). No garbage collector, no manual `free`.
+
+```rust
+fn main() {
+    let s = String::from("hello");  // s owns the string
+    println!("{}", s);
+}   // s goes out of scope — string is freed here
+```
+
+When you assign a heap-allocated value to another variable, ownership moves:
+
+```rust
+let s1 = String::from("hello");
+let s2 = s1;            // ownership moves to s2
+// println!("{}", s1);  // compile error: s1 no longer valid
+println!("{}", s2);     // fine
+```
+
+This is the borrow checker catching a potential use-after-free at compile time. In C that would be a runtime crash or silent corruption. In Rust it's a compiler error.
+
+## Borrowing
+
+Moving ownership everywhere would be impractical. Borrowing lets you pass a reference to a value without giving up ownership:
+
+```rust
+fn print_len(s: &String) {
+    println!("Length: {}", s.len());
+}
+
+fn main() {
+    let s = String::from("hello");
+    print_len(&s);          // lend s to the function
+    println!("{}", s);      // s is still valid here
+}
+```
+
+The `&` creates an immutable reference. Multiple immutable references can coexist. A mutable reference (`&mut`) is exclusive — you can't have any other reference to the same value while a mutable borrow is active:
+
+```rust
+let mut s = String::from("hello");
+let r = &mut s;
+r.push_str(", world");
+println!("{}", r);
+```
+
+The borrow checker enforces these rules at compile time. Once the rules click, you stop fighting the compiler and start appreciating that it's eliminating whole categories of bugs for you.
+
+## Structs and implementations
+
+Rust doesn't have classes, but structs with `impl` blocks cover the same ground:
+
+```rust
+struct Server {
+    host: String,
+    port: u16,
+}
+
+impl Server {
+    fn new(host: &str, port: u16) -> Self {
+        Server {
+            host: host.to_string(),
+            port,
+        }
+    }
+
+    fn addr(&self) -> String {
+        format!("{}:{}", self.host, self.port)
+    }
+}
+
+fn main() {
+    let s = Server::new("localhost", 8080);
+    println!("{}", s.addr());
+}
+```
+
+`Self` refers to the struct type. `&self` is an immutable borrow of the instance. `&mut self` would be a mutable borrow.
+
+## Error handling with Result
+
+Rust has no exceptions. Functions that can fail return `Result<T, E>`:
+
+```rust
+use std::fs;
+
+fn read_config(path: &str) -> Result<String, std::io::Error> {
+    fs::read_to_string(path)
+}
+
+fn main() {
+    match read_config("config.toml") {
+        Ok(contents) => println!("{}", contents),
+        Err(e) => eprintln!("Failed to read config: {}", e),
+    }
+}
+```
+
+The `?` operator is shorthand for propagating errors up the call stack:
+
+```rust
+fn load_and_parse(path: &str) -> Result<Config, Box<dyn std::error::Error>> {
+    let contents = fs::read_to_string(path)?;   // returns early on error
+    let config: Config = toml::from_str(&contents)?;
+    Ok(config)
+}
+```
+
+Explicit error handling makes failure modes visible in the type system. You can't accidentally ignore an error the way you can with unchecked exceptions or C-style return codes.
+
+## Enums and pattern matching
+
+Rust enums are algebraic — each variant can carry different data:
+
+```rust
+enum Command {
+    Start,
+    Stop,
+    Restart { delay_ms: u64 },
+    Send(String),
+}
+
+fn handle(cmd: Command) {
+    match cmd {
+        Command::Start              => println!("starting"),
+        Command::Stop               => println!("stopping"),
+        Command::Restart { delay_ms } => println!("restarting in {}ms", delay_ms),
+        Command::Send(msg)          => println!("sending: {}", msg),
+    }
+}
+```
+
+`match` is exhaustive — the compiler errors if you don't handle every variant. This makes evolving an enum safe: adding a variant will break every `match` that doesn't handle it, making it impossible to silently miss a case.
+
+## Adding dependencies with Cargo
+
+Dependencies go in `Cargo.toml` under `[dependencies]`:
+
+```toml
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+```
+
+Or use the CLI:
+
+```bash
+cargo add serde --features derive
+cargo add tokio --features full
+```
+
+Cargo downloads, compiles, and links dependencies automatically on the next `cargo build`. The ecosystem (crates.io) has excellent libraries for async I/O (`tokio`), serialisation (`serde`), HTTP (`reqwest`), CLI argument parsing (`clap`), and most things you'd need for systems work.
+
+## Async/await
+
+Rust's async model is zero-cost and runtime-agnostic. `tokio` is the most widely used async runtime:
+
+```rust
+use tokio::time::{sleep, Duration};
+
+#[tokio::main]
+async fn main() {
+    println!("start");
+    sleep(Duration::from_millis(100)).await;
+    println!("done");
+}
+```
+
+For concurrent work, `tokio::spawn` runs tasks in parallel:
+
+```rust
+#[tokio::main]
+async fn main() {
+    let a = tokio::spawn(async { fetch("https://example.com/a").await });
+    let b = tokio::spawn(async { fetch("https://example.com/b").await });
+    let (ra, rb) = tokio::join!(a, b);
+}
+```
+
+## Testing
+
+Tests live inline in the same file, under a `#[cfg(test)]` module:
+
+```rust
+fn add(a: i32, b: i32) -> i32 {
+    a + b
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_add() {
+        assert_eq!(add(2, 3), 5);
+    }
+
+    #[test]
+    fn test_add_negative() {
+        assert_eq!(add(-1, 1), 0);
+    }
+}
+```
+
+Run tests:
+
+```bash
+cargo test
+
+# run a specific test by name
+cargo test test_add
+
+# show stdout from passing tests
+cargo test -- --nocapture
+```
+
+## The tools you'll use every day
+
+```bash
+cargo fmt          # format code (uses rustfmt)
+cargo clippy       # linter — catches common mistakes and style issues
+cargo check        # type-check without building (fast feedback loop)
+cargo doc --open   # generate and open documentation for your crate
+cargo test         # run all tests
+cargo build --release   # optimised build
+```
+
+`cargo clippy` in particular is worth running constantly — it catches a wide range of issues that `rustc` accepts but that are almost certainly bugs or poor style.
+
+## Where to go next
+
+- [The Rust Book](https://doc.rust-lang.org/book/) — the canonical reference, free online, covers everything in depth
+- [Rustlings](https://github.com/rust-lang/rustlings) — small exercises that drill ownership and the borrow checker
+- [Rust by Example](https://doc.rust-lang.org/rust-by-example/) — annotated examples for every language feature
+- [Zero To Production In Rust](https://www.zero2prod.com/) — builds a full production web service from scratch; the best way to see how the ecosystem fits together
+
+The borrow checker stops being a battle and starts being a safety net once the ownership model is internalized. That usually takes a few weeks of building something real. Pick a small CLI tool or a simple server, work through the compiler errors — each one is teaching you something that would have been a runtime bug in another language.
