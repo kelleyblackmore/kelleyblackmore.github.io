@@ -1,5 +1,13 @@
 [
   {
+    "slug": "2026-06-21-designing-claude-skills-workflows-agents",
+    "title": "Designing Claude Skills, Workflows, and Agents",
+    "date": "2026-06-21",
+    "excerpt": "A practical guide to the three building blocks of Claude-powered automation — skills for reusable prompts, agents for parallel work, and workflows for deterministic multi-step orchestration.",
+    "tags": ["claude", "ai", "agents", "workflows", "skills", "engineering"],
+    "path": "/posts/2026-06-21-designing-claude-skills-workflows-agents.txt"
+  },
+  {
     "slug": "2026-06-21-rust-dependencies-sbom",
     "title": "Managing Rust Dependencies and Tracking SBOMs",
     "date": "2026-06-21",

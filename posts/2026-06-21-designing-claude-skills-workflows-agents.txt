@@ -1,0 +1,400 @@
+---
+title: "Designing Claude Skills, Workflows, and Agents"
+date: "2026-06-21"
+tags: [claude, ai, agents, workflows, skills, engineering]
+excerpt: "A practical guide to the three building blocks of Claude-powered automation — skills for reusable prompts, agents for parallel work, and workflows for deterministic multi-step orchestration."
+---
+
+# Designing Claude Skills, Workflows, and Agents
+
+Claude's agentic SDK gives you three composable primitives: **skills**, **agents**, and **workflows**. Each solves a different problem. Skills are reusable prompt templates that surface a repeatable task. Agents are parallel workers that can use tools and produce structured output. Workflows are deterministic orchestrators that fan agents out, collect results, and synthesise findings. Used together they let you build automation that goes far beyond a single chat turn.
+
+This post covers each primitive in depth — what it is, when to reach for it, and the design choices that determine whether it's reliable or brittle.
+
+---
+
+## Skills
+
+A skill is a named, reusable prompt that can be invoked by name (as a slash command in Claude Code). Think of it as a macro: it captures a task that is complex to describe from scratch each time but has a stable enough shape to be templated.
+
+### When to write a skill
+
+Write a skill when:
+- You perform the same kind of task repeatedly (code review, writing a spec, generating a standup)
+- The task requires a specific format or set of constraints that are tedious to re-specify
+- You want a team to share a consistent approach to a task without copy-pasting prompts
+
+Don't write a skill for one-off tasks. The value is in the reuse.
+
+### Skill anatomy
+
+A skill is a markdown file in `.claude/skills/` (or a plugin's `skills/` directory). It has YAML frontmatter and a body that becomes the effective prompt:
+
+```markdown
+---
+name: write-spec
+description: >
+  Draft a technical spec for a feature. Use when given a feature
+  description or Jira story and asked to produce a spec document.
+tools:
+  - Read
+  - Glob
+  - WebSearch
+---
+
+You are writing a technical spec for the feature described below.
+
+Structure the spec with these sections:
+1. **Problem** — what user need or system gap this addresses
+2. **Proposed solution** — the approach at a high level
+3. **API / interface changes** — what new or changed surfaces this creates
+4. **Data model changes** — schema additions or migrations required
+5. **Edge cases** — failure modes, limits, and non-obvious behaviour
+6. **Open questions** — decisions not yet made
+
+Keep each section concise. Prefer bullet points over paragraphs.
+Flag anything that needs a decision with **[DECISION NEEDED]**.
+
+Feature description:
+```
+
+The `description` field is the most important line. It tells the model *when* to invoke the skill. Write it as "Use when..." — that framing helps the model match user intent to the right skill.
+
+### Skill design principles
+
+**One skill, one job.** A skill that does "spec writing and code review" will do both poorly. Keep the scope tight.
+
+**Describe the output format explicitly.** "Write a spec" is underspecified. "Structure the spec with these five sections" is not. The more explicit the format, the more consistent the output.
+
+**Name the persona.** "You are a senior engineer writing a spec" outperforms "write a spec". The persona anchors tone, vocabulary level, and the kinds of trade-offs the model weighs.
+
+**Enumerate what to omit.** Skills often need negative constraints. "Do not include implementation code unless the spec specifically calls for it" prevents the model from drifting into premature implementation.
+
+**List the tools the skill needs.** If a code-review skill needs to read files, declare `Read` and `Glob`. Tools not listed won't be available; tools listed unnecessarily add latency and cost.
+
+---
+
+## Agents
+
+An agent is an invocation of Claude with a specific prompt, a set of tools, and optionally a structured output schema. Agents are the workers in your system — they do the actual reading, searching, writing, and reasoning.
+
+### When to spawn an agent
+
+Spawn an agent when:
+- Work can be parallelised (reviewing three files independently, searching four sources simultaneously)
+- You want to protect the main context window from large intermediate results
+- You need a structured output that downstream code will process
+
+Don't spawn an agent for simple lookups or single-tool calls that take one step. The overhead isn't worth it for "read this file and tell me the function count."
+
+### Structured output
+
+The most important agent design choice is whether to use a schema. Without a schema the agent returns free text — useful for human consumption, painful for programmatic use. With a schema the agent is constrained to call a `StructuredOutput` tool and the SDK validates the response before returning it:
+
+```javascript
+const FINDINGS_SCHEMA = {
+  type: "object",
+  properties: {
+    findings: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          file:        { type: "string" },
+          line:        { type: "number" },
+          severity:    { type: "string", enum: ["critical", "high", "medium", "low"] },
+          description: { type: "string" },
+          suggestion:  { type: "string" }
+        },
+        required: ["file", "severity", "description"]
+      }
+    },
+    summary: { type: "string" }
+  },
+  required: ["findings", "summary"]
+};
+
+const result = await agent(
+  "Review src/auth.rs for security vulnerabilities",
+  { schema: FINDINGS_SCHEMA, label: "review:auth" }
+);
+// result.findings is a typed array — no parsing needed
+```
+
+Design schemas to be flat and concrete. Deeply nested schemas with many optional fields produce inconsistent output. If you find yourself adding many `nullable` fields, the schema is probably trying to do too much — split it into two agents.
+
+### Agent prompts
+
+An agent's prompt is its entire job description. Write it as a self-contained brief — the agent has no context from the surrounding workflow:
+
+```javascript
+await agent(`
+  Read the file at ${filePath}.
+  Identify all public functions that lack error handling on IO operations.
+  For each one, report: the function name, the line number, what IO operation
+  is unhandled, and what the failure mode would be.
+  If the file does not exist or has no public functions, return an empty findings array.
+`, { schema: FINDINGS_SCHEMA, label: `io-review:${path.basename(filePath)}` })
+```
+
+Include the failure case explicitly ("if the file does not exist..."). Agents that don't know what to do with edge cases invent something — and what they invent is usually wrong.
+
+### Labelling agents
+
+Always set the `label` option. Labels appear in the workflow progress display and in logs. `"review"` is useless; `"review:auth.rs:security"` tells you exactly what is running and makes debugging fan-out workflows tractable.
+
+---
+
+## Workflows
+
+A workflow is a script that orchestrates many agents deterministically. It has explicit control flow — loops, conditionals, fan-out, fan-in — that is encoded in code rather than left to a model to decide. This is the right level of abstraction for work that is too large for one context window, or that benefits from parallel execution.
+
+### The workflow script structure
+
+Every workflow starts with a `meta` block followed by a script body that uses the workflow primitives:
+
+```javascript
+export const meta = {
+  name: "security-audit",
+  description: "Audit a codebase for security vulnerabilities across multiple dimensions",
+  phases: [
+    { title: "Discover", detail: "Find files and scope the audit" },
+    { title: "Review",   detail: "Run parallel security checks" },
+    { title: "Verify",   detail: "Adversarially validate findings" },
+    { title: "Report",   detail: "Synthesise into a final report" },
+  ],
+};
+
+phase("Discover");
+const files = await agent(
+  "List all source files in src/ that handle authentication, authorisation, or cryptography. Return file paths only.",
+  { schema: { type: "object", properties: { files: { type: "array", items: { type: "string" } } }, required: ["files"] } }
+);
+
+phase("Review");
+const reviews = await pipeline(
+  files.files,
+  f => agent(`Review ${f} for security vulnerabilities`, { schema: FINDINGS_SCHEMA, label: `review:${f}`, phase: "Review" })
+);
+```
+
+The `meta.phases` array must use the same titles as the `phase()` calls in the body — they're matched by string to group agents in the progress display.
+
+### pipeline() vs parallel()
+
+These are the two fan-out primitives and choosing between them matters for performance.
+
+**`pipeline(items, ...stages)`** runs each item through all stages independently with no barrier between stages. Item A can be in stage 3 while item B is still in stage 1. Use this by default:
+
+```javascript
+// Items flow through stages without waiting for each other
+const results = await pipeline(
+  sourceFiles,
+  file  => agent(`Find bugs in ${file}`, { schema: BUGS_SCHEMA, phase: "Find" }),
+  bugs  => agent(`Verify each bug in ${JSON.stringify(bugs.bugs)}`, { schema: VERDICTS_SCHEMA, phase: "Verify" })
+);
+```
+
+**`parallel(thunks)`** is a barrier — it waits for ALL thunks to complete before returning. Use this only when stage N genuinely needs all of stage N-1's output at once (for deduplication, cross-item comparison, or a hard early-exit):
+
+```javascript
+// Need all findings before deduplicating across files
+const allResults = await parallel(
+  dimensions.map(d => () => agent(d.prompt, { schema: FINDINGS_SCHEMA, phase: "Scan" }))
+);
+const deduped = deduplicateByLocation(allResults.filter(Boolean).flatMap(r => r.findings));
+// Now verify only unique findings
+const verified = await pipeline(deduped, f => agent(`Verify: ${f.description}`, { schema: VERDICT_SCHEMA, phase: "Verify" }));
+```
+
+A barrier wastes wall-clock time whenever the fastest items finish and wait for the slowest. If you're reaching for `parallel` because "it feels cleaner," reach for `pipeline` instead.
+
+### Phases
+
+Phases group agents in the progress display. Call `phase("Title")` before the agents that belong to it. Inside `pipeline()` and `parallel()`, set the `phase` option on each agent call instead of calling `phase()` globally — the global call races against concurrent agents:
+
+```javascript
+// Inside a pipeline, use the option — not the global call
+const results = await pipeline(
+  files,
+  f => agent(`Review ${f}`, { schema: FINDINGS_SCHEMA, phase: "Review" }),     // ✓
+  r => agent(`Verify ${r}`, { schema: VERDICTS_SCHEMA,  phase: "Verify" })     // ✓
+);
+
+// Not this — phase() is global state and races in concurrent contexts
+const results = await pipeline(
+  files,
+  f => { phase("Review"); return agent(`Review ${f}`, ...); }  // ✗ race condition
+);
+```
+
+### Adversarial verification
+
+The single most effective quality pattern in workflows is adversarial verification: for each finding from a review agent, spawn a separate agent whose job is to *refute* it. Require a majority of refuters to agree before marking a finding as real:
+
+```javascript
+const verified = await pipeline(
+  allFindings,
+  finding => parallel(
+    [0, 1, 2].map(i => () => agent(
+      `Try to refute this finding. Default to refuted=true if uncertain.\n\nFinding: ${finding.description}\nFile: ${finding.file}`,
+      { schema: { type: "object", properties: { refuted: { type: "boolean" }, reason: { type: "string" } }, required: ["refuted"] },
+        label: `refute:${finding.file}:${i}`,
+        phase: "Verify" }
+    ))
+  ).then(votes => ({
+    ...finding,
+    confirmed: votes.filter(Boolean).filter(v => !v.refuted).length >= 2
+  }))
+);
+
+const confirmed = verified.filter(Boolean).filter(f => f.confirmed);
+```
+
+Three independent refuters, majority vote. This eliminates the plausible-but-wrong findings that a single pass will produce confidently.
+
+### Structured return values
+
+Workflows can return a value that callers (or the main loop) use:
+
+```javascript
+return {
+  confirmed: confirmed.length,
+  findings:  confirmed,
+  skipped:   allFindings.length - confirmed.length,
+};
+```
+
+The return value shows up in the workflow's result and can be used by a calling `workflow()` invocation or processed in the main Claude session.
+
+### The loop-until-dry pattern
+
+For open-ended discovery where you don't know how many items exist, loop until consecutive rounds produce nothing new:
+
+```javascript
+const seen  = new Set();
+const found = [];
+let   dry   = 0;
+
+while (dry < 2) {
+  const result = await agent(
+    `Find security issues we haven't found yet. Already found: ${JSON.stringify([...seen])}`,
+    { schema: BUGS_SCHEMA }
+  );
+  const fresh = result.bugs.filter(b => !seen.has(b.id));
+
+  if (fresh.length === 0) {
+    dry++;
+  } else {
+    dry = 0;
+    fresh.forEach(b => seen.add(b.id));
+    found.push(...fresh);
+    log(`Found ${found.length} issues so far`);
+  }
+}
+
+return { issues: found };
+```
+
+Two consecutive dry rounds before stopping is a reasonable default. One means you stop too early after a lucky empty round; three or more burns tokens on diminishing returns.
+
+---
+
+## Choosing between the three primitives
+
+| Situation | Reach for |
+|-----------|-----------|
+| Same task repeated across sessions | **Skill** |
+| Exploratory one-shot work | **Agent** directly |
+| One task, needs tools | **Agent** |
+| Multiple independent tasks | **Workflow** with `pipeline()` |
+| Results need cross-item synthesis | **Workflow** with `parallel()` barrier |
+| Unknown number of items to find | **Workflow** with loop-until-dry |
+| Quality matters more than speed | **Workflow** with adversarial verify |
+
+The progression is: **skill → agent → workflow**. Start with a skill if the task is well-understood and repeatable. Graduate to a direct agent call if you need tools or structured output. Reach for a workflow when the task is too large for one context window or when you need parallel execution to hit a wall-clock budget.
+
+---
+
+## Common mistakes
+
+**Overusing workflows.** A workflow that spawns 2 agents to do what one could do is just latency and cost. Use a workflow when you genuinely need fan-out or multi-phase orchestration.
+
+**Agent prompts that assume context.** Agents are stateless — they don't know what came before. Every prompt must be self-contained. "Review the changes from earlier" will fail because the agent has no "earlier."
+
+**Schemas with too many optional fields.** Schemas that have 15 properties and 12 of them are optional produce inconsistent output. If a field matters, make it required. If it doesn't, remove it.
+
+**Calling `phase()` inside `pipeline()`.** The global `phase()` races with concurrent agents. Use the `phase` option on the agent call instead.
+
+**Not labelling agents.** Unlabelled agents in a 30-agent workflow are indistinguishable in logs. Label everything with enough specificity to know what failed without reading the prompt.
+
+**Silently capping coverage.** If a workflow only processes the top 20 files, say so with `log()`. A result that reads as comprehensive when it only covers 20% of the codebase is worse than a result that's honest about its scope.
+
+---
+
+## Putting it together: a design review workflow
+
+```javascript
+export const meta = {
+  name: "design-review",
+  description: "Review an architecture proposal across correctness, security, and operability",
+  phases: [
+    { title: "Read" },
+    { title: "Review" },
+    { title: "Verify" },
+  ],
+};
+
+const DIMENSIONS = [
+  { key: "correctness", prompt: "Does this design achieve its stated goals? What edge cases break it?" },
+  { key: "security",    prompt: "What are the security risks in this design? What attack surfaces does it create?" },
+  { key: "operability", prompt: "How will this system behave at 3am when something goes wrong? What observability is missing?" },
+];
+
+const REVIEW_SCHEMA = {
+  type: "object",
+  properties: {
+    dimension: { type: "string" },
+    concerns:  { type: "array", items: { type: "string" } },
+    blockers:  { type: "array", items: { type: "string" } },
+  },
+  required: ["dimension", "concerns", "blockers"]
+};
+
+phase("Read");
+const doc = await agent(
+  `Read the design document and summarise it in 200 words for reviewers who haven't seen it.`,
+  { label: "read:doc" }
+);
+
+phase("Review");
+const reviews = await pipeline(
+  DIMENSIONS,
+  d => agent(
+    `Design document summary:\n${doc}\n\nYour review dimension: ${d.prompt}`,
+    { schema: REVIEW_SCHEMA, label: `review:${d.key}`, phase: "Review" }
+  )
+);
+
+phase("Verify");
+const blockers = reviews.filter(Boolean).flatMap(r => r.blockers);
+const verified = await pipeline(
+  blockers,
+  b => agent(
+    `Is this a genuine blocker or is it solvable within the current design?\nBlocker: ${b}`,
+    { schema: { type: "object", properties: { genuine: { type: "boolean" }, rationale: { type: "string" } }, required: ["genuine", "rationale"] },
+      label: `verify:${b.slice(0, 40)}`,
+      phase: "Verify" }
+  )
+);
+
+const realBlockers = verified.filter(Boolean).filter(v => v.genuine);
+
+return {
+  summary:  doc,
+  concerns: reviews.filter(Boolean).flatMap(r => r.concerns),
+  blockers: realBlockers.map(v => v.rationale),
+};
+```
+
+Three dimensions in parallel (via pipeline), each concern verified independently, real blockers separated from false alarms. A design review that used to take 45 minutes of meeting time runs in under two minutes.
