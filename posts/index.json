@@ -1,5 +1,13 @@
 [
   {
+    "slug": "2026-08-06-vite-backend-keycloak",
+    "title": "Adding a Backend and Keycloak to a Vite App",
+    "date": "2026-08-06",
+    "excerpt": "Wiring a Vite SPA to a real backend and Keycloak — using a backend-for-frontend so access tokens never touch browser JavaScript, plus the proxy trick that makes dev and prod behave identically.",
+    "tags": ["vite", "keycloak", "oidc", "auth", "security", "react"],
+    "path": "/posts/2026-08-06-vite-backend-keycloak.txt"
+  },
+  {
     "slug": "2026-06-21-designing-claude-skills-workflows-agents",
     "title": "Designing Claude Skills, Workflows, and Agents",
     "date": "2026-06-21",
