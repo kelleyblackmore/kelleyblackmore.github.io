@@ -1,0 +1,526 @@
+---
+title: "Adding a Backend and Keycloak to a Vite App"
+date: "2026-08-06"
+tags: [vite, keycloak, oidc, auth, security, react]
+excerpt: "Wiring a Vite SPA to a real backend and Keycloak — using a backend-for-frontend so access tokens never touch browser JavaScript, plus the proxy trick that makes dev and prod behave identically."
+---
+
+# Adding a Backend and Keycloak to a Vite App
+
+You start with `npm create vite@latest`. It's fast, it hot-reloads, life is good. Then two requirements land: the app needs a real backend, and it needs to authenticate against Keycloak because that's what the org already runs.
+
+Most tutorials answer this with `keycloak-js`: install the adapter, drop the access token in memory, attach it to every `fetch`. It works, and it's the wrong default. This post walks through the alternative — a small **backend-for-frontend (BFF)** that owns the OIDC flow and hands the browser nothing but an `httpOnly` session cookie — and the Vite configuration that makes the whole thing behave the same in `npm run dev` as it does in production.
+
+## Two ways to connect a SPA to Keycloak
+
+| | Public client in the SPA | Backend-for-frontend |
+|---|---|---|
+| Who runs the code flow | Browser (`keycloak-js`) | Your server |
+| Where the access token lives | Browser memory or storage | Server-side session |
+| What the browser holds | Access + refresh tokens | An opaque `httpOnly` cookie |
+| Impact of an XSS bug | Tokens exfiltrated | Attacker can call your API *while the page is open*, but steals nothing reusable |
+| Keycloak client type | Public | Confidential |
+| Extra moving parts | None | One server process |
+
+The first column is legitimately simpler, and if you're building a purely static app with no backend at all, it's your only option. But the moment you're standing up a backend anyway — and this post assumes you are — the BFF pattern is the better trade. It's also what the IETF's *OAuth 2.0 for Browser-Based Applications* guidance points at: keep tokens out of the browser when a server is available to hold them.
+
+There's a practical reason too. Browsers have spent the last few years killing third-party cookies, which is exactly what silent-renewal-via-hidden-iframe depended on. Adapters that still work do so by keeping a refresh token in the browser, which is the thing you were trying to avoid. A server-side session sidesteps the whole category.
+
+## Step 0: Run Keycloak
+
+```yaml
+# docker-compose.yml
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    command: start-dev --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HOSTNAME: http://localhost:8080
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm.json:ro
+```
+
+Two notes. `KC_BOOTSTRAP_ADMIN_USERNAME` / `KC_BOOTSTRAP_ADMIN_PASSWORD` replaced the older `KEYCLOAK_ADMIN` pair in Keycloak 26 — if you're on an older tag, use the old names. And setting `KC_HOSTNAME` explicitly matters more than it looks; I'll come back to why in the gotchas.
+
+Everything under `/auth` in old Keycloak URLs is gone as of v17. The endpoints you care about now live at:
+
+```
+http://localhost:8080/realms/demo/.well-known/openid-configuration
+http://localhost:8080/realms/demo/protocol/openid-connect/auth
+http://localhost:8080/realms/demo/protocol/openid-connect/token
+http://localhost:8080/realms/demo/protocol/openid-connect/certs
+```
+
+Fetch the discovery document once at boot and read the rest from it rather than hard-coding paths.
+
+## Step 1: Configure the client
+
+Create a realm (`demo`), then a client. The settings that matter:
+
+- **Client ID**: `demo-bff`
+- **Client authentication**: **On** — this makes it a confidential client and generates a secret. This is the single most important toggle on the page.
+- **Standard flow**: On. **Direct access grants**: Off (you don't want the password grant). **Implicit flow**: Off.
+- **Valid redirect URIs**: `http://localhost:5173/auth/callback` and `https://app.example.com/auth/callback`. Keycloak matches these exactly; a trailing slash mismatch is a rejected login.
+- **Valid post logout redirect URIs**: `http://localhost:5173/` and `https://app.example.com/`
+- **Web origins**: leave it **empty**. With a BFF, the browser never talks to Keycloak over XHR — only via top-level redirects — so there's no CORS to allow. If you find yourself needing `+` here, something is calling Keycloak from browser JS.
+
+Grab the client secret from the Credentials tab. It goes in the backend's environment and **nowhere near the frontend**. Vite inlines every `VITE_`-prefixed variable into the bundle it ships to the browser — `import.meta.env.VITE_KEYCLOAK_SECRET` is a secret published to the internet.
+
+## Step 2: The BFF
+
+One Express process, four auth routes, and your API. Dependencies are deliberately thin — `jose` for JWT verification and the platform `fetch`, so there's no OIDC library API to keep up with.
+
+```bash
+npm i express cookie-parser jose
+```
+
+```js
+// server/auth.js
+import crypto from 'node:crypto'
+import { createRemoteJWKSet, jwtVerify } from 'jose'
+
+const ISSUER        = process.env.KC_ISSUER          // http://localhost:8080/realms/demo
+const CLIENT_ID     = process.env.KC_CLIENT_ID       // demo-bff
+const CLIENT_SECRET = process.env.KC_CLIENT_SECRET
+const APP_ORIGIN    = process.env.APP_ORIGIN         // http://localhost:5173
+
+const oidc = await fetch(`${ISSUER}/.well-known/openid-configuration`).then(r => r.json())
+const jwks = createRemoteJWKSet(new URL(oidc.jwks_uri))
+
+// Dev-only stores. See the production section for what to use instead.
+const sessions = new Map()   // sid -> { tokens, expiresAt, user }
+const pending  = new Map()   // state -> { verifier, nonce, returnTo }
+```
+
+### Login
+
+The authorization request, with PKCE. Even though this is a confidential client, PKCE costs nothing and protects against code interception:
+
+```js
+export function login(req, res) {
+  const verifier  = crypto.randomBytes(32).toString('base64url')
+  const challenge = crypto.createHash('sha256').update(verifier).digest('base64url')
+  const state     = crypto.randomBytes(16).toString('base64url')
+  const nonce     = crypto.randomBytes(16).toString('base64url')
+
+  // Only ever redirect back to a path on our own site.
+  const raw      = String(req.query.returnTo ?? '/')
+  const returnTo = raw.startsWith('/') && !raw.startsWith('//') ? raw : '/'
+
+  pending.set(state, { verifier, nonce, returnTo, createdAt: Date.now() })
+
+  const url = new URL(oidc.authorization_endpoint)
+  url.searchParams.set('client_id', CLIENT_ID)
+  url.searchParams.set('redirect_uri', `${APP_ORIGIN}/auth/callback`)
+  url.searchParams.set('response_type', 'code')
+  url.searchParams.set('scope', 'openid profile email')
+  url.searchParams.set('state', state)
+  url.searchParams.set('nonce', nonce)
+  url.searchParams.set('code_challenge', challenge)
+  url.searchParams.set('code_challenge_method', 'S256')
+
+  res.redirect(url.toString())
+}
+```
+
+The `returnTo` validation is not optional. An unchecked redirect parameter is an open redirect, and open redirects on an auth endpoint are a phishing primitive.
+
+Note that `redirect_uri` points at `APP_ORIGIN` — the Vite dev server on :5173, not the backend on :3000. That's intentional, and Step 3 explains how the request gets to the backend anyway.
+
+### Callback
+
+```js
+export async function callback(req, res) {
+  const { code, state } = req.query
+  const flow = pending.get(state)
+  if (!flow) return res.status(400).send('Invalid or expired login state')
+  pending.delete(state)
+
+  const body = new URLSearchParams({
+    grant_type:    'authorization_code',
+    code,
+    redirect_uri:  `${APP_ORIGIN}/auth/callback`,
+    client_id:     CLIENT_ID,
+    client_secret: CLIENT_SECRET,
+    code_verifier: flow.verifier,
+  })
+
+  const tokenRes = await fetch(oidc.token_endpoint, {
+    method:  'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body,
+  })
+  if (!tokenRes.ok) return res.status(502).send('Token exchange failed')
+  const tokens = await tokenRes.json()
+
+  // Verify the ID token rather than trusting the response body.
+  const { payload } = await jwtVerify(tokens.id_token, jwks, {
+    issuer:   ISSUER,
+    audience: CLIENT_ID,
+  })
+  if (payload.nonce !== flow.nonce) return res.status(400).send('Nonce mismatch')
+
+  const sid = crypto.randomBytes(32).toString('base64url')
+  sessions.set(sid, {
+    tokens,
+    expiresAt: Date.now() + tokens.expires_in * 1000,
+    user: {
+      sub:      payload.sub,
+      email:    payload.email,
+      name:     payload.name,
+      username: payload.preferred_username,
+    },
+  })
+
+  res.cookie('sid', sid, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure:   process.env.NODE_ENV === 'production',
+    path:     '/',
+    maxAge:   8 * 60 * 60 * 1000,
+  })
+  res.redirect(flow.returnTo)
+}
+```
+
+`sameSite: 'lax'` is what lets the cookie survive the redirect back from Keycloak. `strict` would drop it on that navigation and put you in a login loop.
+
+### Session middleware and refresh
+
+```js
+async function refresh(s) {
+  const body = new URLSearchParams({
+    grant_type:    'refresh_token',
+    refresh_token: s.tokens.refresh_token,
+    client_id:     CLIENT_ID,
+    client_secret: CLIENT_SECRET,
+  })
+  const res = await fetch(oidc.token_endpoint, {
+    method:  'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body,
+  })
+  if (!res.ok) throw new Error('refresh failed')
+
+  s.tokens    = await res.json()
+  s.expiresAt = Date.now() + s.tokens.expires_in * 1000
+  return s
+}
+
+export async function session(req, res, next) {
+  const sid = req.cookies.sid
+  const s   = sid && sessions.get(sid)
+  if (!s) return next()
+
+  if (Date.now() > s.expiresAt - 15_000) {
+    // Dedupe: two concurrent requests must not both burn the refresh token.
+    s.refreshing ??= refresh(s).finally(() => { s.refreshing = null })
+    try {
+      await s.refreshing
+    } catch {
+      sessions.delete(sid)
+      res.clearCookie('sid', { path: '/' })
+      return next()
+    }
+  }
+
+  req.session = s
+  next()
+}
+
+export function requireAuth(req, res, next) {
+  if (!req.session) return res.status(401).json({ error: 'unauthenticated' })
+  next()
+}
+```
+
+The dedupe matters. Keycloak's **Revoke Refresh Token** setting (realm → Sessions → Refresh token) rotates the refresh token on every use and invalidates the old one. Two parallel requests refreshing the same session will race, and the loser logs the user out. Reassigning `s.tokens` from the response also means rotation is handled correctly — don't merge, replace.
+
+### Logout
+
+```js
+export function logout(req, res) {
+  const s = sessions.get(req.cookies.sid)
+  sessions.delete(req.cookies.sid)
+  res.clearCookie('sid', { path: '/' })
+
+  if (!s) return res.json({ logoutUrl: APP_ORIGIN })
+
+  const url = new URL(oidc.end_session_endpoint)
+  url.searchParams.set('id_token_hint', s.tokens.id_token)
+  url.searchParams.set('post_logout_redirect_uri', APP_ORIGIN)
+  res.json({ logoutUrl: url.toString() })
+}
+```
+
+Two things people get wrong here. Clearing your own cookie is not logging out — the Keycloak SSO session is still live, so the next login silently succeeds without a prompt and it looks like logout did nothing. You need RP-initiated logout at `end_session_endpoint`. And it has to be a **top-level navigation**, not a `fetch`, or Keycloak's own session cookie won't be cleared. Hence returning a URL for the client to navigate to, rather than redirecting.
+
+`post_logout_redirect_uri` requires `id_token_hint` (or `client_id`) to be present, and the URI must be registered in **Valid post logout redirect URIs**.
+
+### Wiring it up
+
+```js
+// server/index.js
+import express from 'express'
+import cookieParser from 'cookie-parser'
+import { login, callback, logout, session, requireAuth } from './auth.js'
+
+const app = express()
+app.use(express.json())
+app.use(cookieParser())
+app.use(session)
+
+// CSRF: the session cookie is SameSite=Lax, so cross-site POSTs are already
+// blocked by the browser. This is defence in depth for anything that slips past.
+const SAFE = new Set(['GET', 'HEAD', 'OPTIONS'])
+app.use((req, res, next) => {
+  if (SAFE.has(req.method)) return next()
+  const origin = req.get('origin')
+  if (origin && origin !== process.env.APP_ORIGIN) {
+    return res.status(403).json({ error: 'bad origin' })
+  }
+  next()
+})
+
+app.get('/auth/login', login)
+app.get('/auth/callback', callback)
+app.post('/auth/logout', logout)
+app.get('/auth/me', requireAuth, (req, res) => res.json(req.session.user))
+
+app.get('/api/projects', requireAuth, async (req, res) => {
+  res.json(await listProjects(req.session.user.sub))
+})
+
+app.listen(3000)
+```
+
+Note what `/auth/me` returns: the user's claims, never the tokens. The browser has no reason to see an access token, and the moment you return one you've thrown away the property you built this for.
+
+## Step 3: Point Vite at it
+
+This is the piece that makes everything else simple. Rather than running the SPA on `:5173` and the API on `:3000` as two different origins — cross-origin cookies, CORS preflights, `credentials: 'include'`, `SameSite=None` — proxy the backend through the dev server so the browser only ever sees one origin.
+
+```js
+// vite.config.js
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    port: 5173,
+    proxy: {
+      '/api':  { target: 'http://localhost:3000' },
+      '/auth': { target: 'http://localhost:3000' },
+    },
+  },
+})
+```
+
+Now `http://localhost:5173/auth/login` reaches Express, the `sid` cookie is a first-party cookie on `localhost:5173`, and `fetch('/api/projects')` just works. No CORS configuration exists anywhere in this project, which is the goal — CORS config in a SPA usually means the architecture put the browser somewhere it didn't need to be.
+
+Leave `changeOrigin` at its default (`false`) so the backend sees the browser's `Host`. And skip `secure: false` unless your backend actually speaks HTTPS with a self-signed cert.
+
+In production you reproduce the same shape with nginx, a CDN behind the same hostname, or by having the backend serve the built `dist/` directory:
+
+```nginx
+location /api/  { proxy_pass http://bff:3000; }
+location /auth/ { proxy_pass http://bff:3000; }
+location /      { try_files $uri /index.html; }
+```
+
+Same origin in dev, same origin in prod. The cookie rules that work locally are the cookie rules that work deployed, which is the class of bug this eliminates entirely.
+
+## Step 4: The React side
+
+Because the token handling lives on the server, the client is small.
+
+```jsx
+// src/auth.jsx
+import { createContext, useContext, useEffect, useState } from 'react'
+
+const AuthContext = createContext(null)
+
+export function AuthProvider({ children }) {
+  const [state, setState] = useState({ status: 'loading', user: null })
+
+  useEffect(() => {
+    fetch('/auth/me', { credentials: 'same-origin' })
+      .then(r => (r.ok ? r.json() : null))
+      .then(user => setState({ status: user ? 'authenticated' : 'anonymous', user }))
+      .catch(() => setState({ status: 'anonymous', user: null }))
+  }, [])
+
+  const login = () => {
+    const returnTo = encodeURIComponent(location.pathname + location.search)
+    location.href = `/auth/login?returnTo=${returnTo}`
+  }
+
+  const logout = async () => {
+    const res = await fetch('/auth/logout', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'X-Requested-With': 'fetch' },
+    })
+    const { logoutUrl } = await res.json()
+    location.href = logoutUrl          // must be a top-level navigation
+  }
+
+  return (
+    <AuthContext.Provider value={{ ...state, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  )
+}
+
+export const useAuth = () => useContext(AuthContext)
+```
+
+And one fetch wrapper that knows what a 401 means:
+
+```js
+// src/api.js
+export async function apiFetch(path, options = {}) {
+  const res = await fetch(path, {
+    ...options,
+    credentials: 'same-origin',
+    headers: { 'X-Requested-With': 'fetch', ...options.headers },
+  })
+
+  if (res.status === 401) {
+    const returnTo = encodeURIComponent(location.pathname + location.search)
+    location.href = `/auth/login?returnTo=${returnTo}`
+    return new Promise(() => {})   // page is navigating; never resolve
+  }
+
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`)
+  return res.json()
+}
+```
+
+The never-resolving promise is deliberate: the tab is on its way to Keycloak, and you don't want every caller rendering an error flash on the way out.
+
+A route guard is now just a state check — no token parsing, no expiry math, no refresh timer:
+
+```jsx
+export function RequireAuth({ children }) {
+  const { status, login } = useAuth()
+  useEffect(() => { if (status === 'anonymous') login() }, [status])
+  if (status !== 'authenticated') return <Spinner />
+  return children
+}
+```
+
+Session expiry is handled by the same 401 path as everything else. There is no clock in the frontend, which means there's no clock in the frontend to get wrong.
+
+## Roles and authorization
+
+Keycloak puts roles in the access token, not the ID token. Decode it once at callback time and keep what you need on the session:
+
+```js
+const { payload: at } = await jwtVerify(tokens.access_token, jwks, { issuer: ISSUER })
+const roles = [
+  ...(at.realm_access?.roles ?? []),
+  ...(at.resource_access?.[CLIENT_ID]?.roles ?? []),
+]
+```
+
+```js
+export const requireRole = role => (req, res, next) =>
+  req.session?.roles?.includes(role)
+    ? next()
+    : res.status(403).json({ error: 'forbidden' })
+
+app.delete('/api/projects/:id', requireAuth, requireRole('project-admin'), removeProject)
+```
+
+Send roles to the frontend for rendering decisions if you like — hide the delete button — but keep the real check on the server. Client-side role checks are a UX feature, not a control.
+
+## If your API is a separate service
+
+The BFF-is-the-API version above is the simplest thing that works. When the API is its own deployment, the BFF forwards requests with the access token attached, and the API verifies it independently:
+
+```js
+app.use('/api', requireAuth, async (req, res) => {
+  const upstream = await fetch(`${API_BASE}${req.originalUrl.slice(4)}`, {
+    method:  req.method,
+    headers: {
+      authorization:  `Bearer ${req.session.tokens.access_token}`,
+      'content-type': req.get('content-type') ?? 'application/json',
+    },
+    body: SAFE.has(req.method) ? undefined : JSON.stringify(req.body),
+    redirect: 'manual',
+  })
+  res.status(upstream.status)
+  res.set('content-type', upstream.headers.get('content-type') ?? 'application/json')
+  res.send(Buffer.from(await upstream.arrayBuffer()))
+})
+```
+
+On the API side, verification is stateless:
+
+```js
+import { createRemoteJWKSet, jwtVerify } from 'jose'
+const jwks = createRemoteJWKSet(new URL(`${ISSUER}/protocol/openid-connect/certs`))
+
+export async function requireToken(req, res, next) {
+  const [scheme, token] = (req.get('authorization') ?? '').split(' ')
+  if (scheme !== 'Bearer' || !token) {
+    return res.status(401).json({ error: 'missing bearer token' })
+  }
+  try {
+    const { payload } = await jwtVerify(token, jwks, {
+      issuer:   ISSUER,
+      audience: 'demo-api',
+    })
+    req.user = payload
+    next()
+  } catch {
+    res.status(401).json({ error: 'invalid token' })
+  }
+}
+```
+
+`createRemoteJWKSet` caches keys and refetches on unknown `kid`, so key rotation is handled without a restart.
+
+The trap here: **that audience check will fail out of the box.** An access token issued to `demo-bff` doesn't automatically list `demo-api` in `aud`. Add an **Audience** protocol mapper to the `demo-bff` client — Client scopes → `demo-bff-dedicated` → Add mapper → By configuration → Audience → Included Client Audience: `demo-api`. Don't fix it by dropping the audience check; that's what stops a token minted for some other client being replayed against your API.
+
+## Production checklist
+
+**Session storage.** The `Map` is fine for a single dev process and wrong for anything else — it doesn't survive a restart and doesn't work behind more than one replica. Move it to Redis with a TTL matching the refresh token lifetime. Encrypt the token blob at rest if your threat model includes someone reading the session store.
+
+**Cookie flags.** `secure: true` in production; note it's conditional in the code above because a `Secure` cookie over plain `http://localhost` is silently dropped and produces a very confusing login loop. Keep `httpOnly`, keep `sameSite: 'lax'`, keep `path: '/'`.
+
+**Same site, genuinely.** `SameSite=Lax` requires the frontend and backend to be same-site. `app.example.com` + `api.example.com` is same-site (the registrable domain matches) and works. `app.example.com` + `api.example.net` does not — you'd be into `SameSite=None; Secure` and CORS, which is the mess Step 3 avoided.
+
+**Pin the issuer.** `KC_ISSUER` should be the public URL, identical to what tokens carry in `iss`. Mismatch here is the single most common Keycloak-in-Docker failure.
+
+**Short access tokens.** Five minutes is fine; the BFF refreshes transparently. Give the SSO session and refresh token whatever length your policy calls for.
+
+**Log the auth failures.** Token exchange failures, nonce mismatches, and refresh failures should be visible in your logs with the `sub` attached. When a user says "it logged me out again," this is the only way to answer.
+
+## Gotchas worth writing down
+
+**Issuer mismatch inside Docker.** The browser hits `http://localhost:8080`, the backend container hits `http://keycloak:8080`, tokens carry one `iss`, and `jwtVerify` rejects. Set `KC_HOSTNAME` to the public URL so the issuer is stable, and give the backend a route to that same hostname — a compose `extra_hosts` alias, or just use the public URL from the backend too.
+
+**Redirect URIs are matched exactly.** `http://localhost:5173/auth/callback` and `.../callback/` are different. Wildcards work but scope them tightly — a broad `http://localhost:*` in a realm that also serves production is a real hole.
+
+**`http://localhost` vs `http://127.0.0.1`.** They're different origins to the browser and different redirect URIs to Keycloak. Pick one and use it everywhere.
+
+**Preview mode has no proxy.** `vite preview` serves the built bundle without `server.proxy` — it has its own `preview.proxy` block. Copy the config across or you'll spend twenty minutes on 404s from `/api` after a build that "worked in dev."
+
+**`SameSite=Strict` breaks the callback.** The redirect back from Keycloak is a cross-site navigation. `Lax` sends the cookie on top-level GETs; `Strict` doesn't, and you get an infinite login loop.
+
+**Clock skew.** JWT validation on a host whose clock has drifted produces `"exp" claim timestamp check failed` on tokens that are perfectly valid. If you must, `jose` accepts a `clockTolerance`, but fixing NTP is the actual fix.
+
+**`VITE_`-prefixed secrets are public.** Worth repeating. Anything in `import.meta.env.VITE_*` is in the bundle. The client secret, the DB URL, and the internal hostnames all belong in the backend's environment.
+
+## Wrapping up
+
+The end state is worth the setup. The frontend has no token logic — no adapter, no refresh timers, no storage decisions, no expiry arithmetic. It has a `fetch` wrapper and a 401 handler. The backend owns the OIDC flow, and the browser holds a cookie it can't read.
+
+That's the real argument for the BFF, more than the security posture: there's simply less of it. The interesting failure modes move from your React tree to a single Express module with four routes, and both dev and prod hit the same origin so what you test is what you ship.
